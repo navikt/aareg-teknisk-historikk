@@ -1,0 +1,262 @@
+openapi: 3.0.3
+info:
+  title: AAREG Teknisk Historikk
+  version: '1'
+  description: |-
+    API for oppslag av teknisk historikk for arbeidsforhold
+  contact:
+    name: Team Arbeidsforhold
+    url: https://navikt.github.io/aareg/tjenester/integrasjon/tekniskapi/
+servers:
+  - url: https://aareg-teknisk-historikk.nav.no
+    description: Produksjonsserver
+paths:
+  /api/v1/arbeidsforhold:
+    post:
+      tags:
+        - arbeidsforholdsøk
+      summary: Søk etter teknisk historikk for en arbeidstaker
+      description: Teknisk historikk for arbeidstakere er representert som en **liste av en liste av arbeidsforhold**, gruppert på arbeidssted.
+      operationId: finnTekniskHistorikkForArbeidstaker
+      requestBody:
+        description: Søkeparametere
+        content:
+          'application/json':
+            schema:
+              $ref: '#/components/schemas/Soekeparametere'
+          'multipart/form-data':
+            schema:
+              $ref: '#/components/schemas/Soekeparametere'
+      responses:
+        "200":
+          description: Vellykket forespørsel
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  antallArbeidsforhold:
+                    type: integer
+                    example: 1
+                    format: int32
+                  arbeidsforholdForVirksomhet:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Arbeidsforholdgruppe'
+        "400":
+          description: Ugyldig(e) parameter(e) eller dataelement(er) i forespørsel
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TjenestefeilResponse'
+        "403":
+          description: Ingen tilgang til forespurt ressurs
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TjenestefeilResponse'
+        "401":
+          description: Token mangler eller er ugyldig
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TjenestefeilResponse'
+        "500":
+          description: Noe gikk galt
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TjenestefeilResponse'
+        "404":
+          description: Fant ikke forespurt(e) ressurs(er)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TjenestefeilResponse'
+security:
+  - maskinporten: [ ]
+components:
+  securitySchemes:
+    maskinporten:
+      description: "Maskinporten-token (med 'Bearer'-prefix). Se [DigDir sine sider](https://www.digdir.no/felleslosninger/maskinporten/869) for informasjon om Maskinporten"
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    Soekeparametere:
+      type: object
+      properties:
+        arbeidstakerident:
+          type: string
+    Arbeidsforholdgruppe:
+      type: object
+      description: En liste av arbeidsforhold som tilhører en unik kombinasjon av arbeidstaker/arbeidssted/opplysningspliktig
+      properties:
+        arbeidstaker:
+          $ref: '#/components/schemas/Person'
+        opplysningspliktig:
+          $ref: '#/components/schemas/Hovedenhet'
+        arbeidssted:
+          oneOf:
+            - $ref: '#/components/schemas/Underenhet'
+            - $ref: '#/components/schemas/Person'
+          discriminator:
+            propertyName: type
+          required:
+            - type
+            - offentligIdent
+        arbeidsforhold:
+          type: array
+          items:
+            $ref: '#/components/schemas/Arbeidsforhold'
+    Person:
+      type: object
+      description: Identtype som representerer en person. 'type' vil alltid være 'Person'
+      properties:
+        type:
+          type: string
+          example: Person
+        offentligIdent:
+          type: string
+          description: Offentlig ident for en person vil være et personnummer
+          example: '31129912345'
+      required:
+        - type
+        - offentligIdent
+    Underenhet:
+      type: object
+      description: Identtype som representerer en underenhet. 'type' vil alltid være 'Underenhet'
+      properties:
+        type:
+          type: string
+          example: Underenhet
+        offentligIdent:
+          type: string
+          description: Offentlig ident for en enhet vil være et organisasjonsnummer
+          example: '81234567'
+      required:
+        - type
+        - offentligIdent
+    Hovedenhet:
+      type: object
+      description: Identtype som representerer en hovedenhet. 'type' vil alltid være 'Hovedenhet'
+      properties:
+        type:
+          type: string
+          example: Hovedenhet
+        offentligIdent:
+          description: Offentlig ident for en enhet vil være et organisasjonsnummer
+          type: string
+          example: '81234567'
+      required:
+        - type
+        - offentligIdent
+    Ansettelsesperiode:
+      type: object
+      properties:
+        startdato:
+          type: string
+          description: 'Fra-og-med-dato for periode, format (ISO-8601): yyyy-MM-dd'
+          format: date
+          example: '2014-07-01'
+        sluttdato:
+          type: string
+          description: 'Til-og-med-dato for periode, format (ISO-8601): yyyy-MM-dd'
+          format: date
+          example: '2015-12-31'
+        sluttaarsak:
+          $ref: '#/components/schemas/Kodeverksentitet'
+        varsling:
+          $ref: '#/components/schemas/Kodeverksentitet'
+        sporingsinformasjon:
+          $ref: '#/components/schemas/Sporingsinformasjon'
+      description: Informasjon knyttet til ansettelsesperiode
+    Arbeidsforhold:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Arbeidsforhold-id fra opplysningspliktig. **Merk:** Ikke garantert å være unik
+          example: abc-321
+        uuid:
+          type: string
+          format: uuid
+          description: UUID for arbeidsforholdet (i Aa-registeret). Kan benyttes for oppslag i feks
+          example: 54c260b3-344a-48da-b2ab-e472978cd2b4
+        type:
+          $ref: '#/components/schemas/Kodeverksentitet'
+        rapporteringsordning:
+          $ref: '#/components/schemas/Kodeverksentitet'
+        ansettelsesperioder:
+          type: array
+          items:
+            $ref: '#/components/schemas/Ansettelsesperiode'
+        sporingsinformasjon:
+          $ref: '#/components/schemas/Sporingsinformasjon'
+        varsler:
+          type: array
+          description: Liste av unike varsler for ulike entiter
+          items:
+            $ref: '#/components/schemas/Varsel'
+      description: Informasjon om arbeidsforhold
+    Kodeverksentitet:
+      type: object
+      properties:
+        kode:
+          type: string
+          description: Kode for kodeverksentitet
+        beskrivelse:
+          type: string
+          description: Beskrivelse for kodeverksentitet
+      description: Informasjon om kodeverk
+    Sporingsinformasjon:
+      type: object
+      properties:
+        opprettetTidspunkt:
+          type: string
+          description: 'Tidspunkt for opprettelse, format (ISO-8601): yyyy-MM-dd''T''HH:mm[:ss[.SSSSSSSSS]]'
+          format: date-time
+          example: 2018-09-19T12:10:58.059Z
+        opprettetAv:
+          $ref: '#/components/schemas/Endringskilde'
+        slettetTidspunkt:
+          type: string
+          description: 'Tidspunkt for endring, format (ISO-8601): yyyy-MM-dd''T''HH:mm[:ss[.SSSSSSSSS]]'
+          format: date-time
+          example: 2018-09-19T12:11:20.79Z
+        slettetAv:
+          $ref: '#/components/schemas/Endringskilde'
+      description: 'Informasjon om opprettelse og endring av objektet.'
+    Endringskilde:
+      type: string
+      description: Viser opphavet til en endringen.
+      enum:
+        - saksbehandler
+        - a-ordningen
+        - gjenoppbygging
+        - maskinelt-avsluttet
+        - patch
+    Varsel:
+      type: object
+      properties:
+        entitet:
+          type: string
+          description: Entitet for varsel
+          enum:
+            - Arbeidsforhold
+            - Ansettelsesperiode
+            - Permisjon
+            - Permittering
+        varsling:
+          $ref: '#/components/schemas/Kodeverksentitet'
+      description: Informasjon om varsel
+    TjenestefeilResponse:
+      type: object
+      properties:
+        meldinger:
+          type: array
+          description: Liste med informasjon om hva som er feil
+          items:
+            type: string
+            description: Liste med informasjon om hva som er feil
+      description: Responsobjekt ved feil i tjeneste
