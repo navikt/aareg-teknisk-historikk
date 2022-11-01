@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <springProperty name="app.name" source="app.name"/>
+
+    <springProfile name="log-logstash">
+        <appender name="secureLog" class="ch.qos.logback.core.rolling.RollingFileAppender">
+            <file>/secure-logs/secure.log</file>
+            <rollingPolicy class="ch.qos.logback.core.rolling.FixedWindowRollingPolicy">
+                <fileNamePattern>/secure-logs/secure.log.%i</fileNamePattern>
+                <minIndex>1</minIndex>
+                <maxIndex>1</maxIndex>
+            </rollingPolicy>
+            <triggeringPolicy class="ch.qos.logback.core.rolling.SizeBasedTriggeringPolicy">
+                <maxFileSize>50MB</maxFileSize>
+            </triggeringPolicy>
+            <encoder class="net.logstash.logback.encoder.LogstashEncoder"/>
+        </appender>
+
+        <logger name="secureLogger" level="INFO" additivity="false">
+            <appender-ref ref="secureLog"/>
+        </logger>
+
+        <logger name="auditLogger" level="INFO" additivity="false">
+            <appender-ref ref="auditLog"/>
+        </logger>
+
+        <appender name="stdout_json" class="ch.qos.logback.core.ConsoleAppender">
+            <encoder class="net.logstash.logback.encoder.LogstashEncoder"/>
+        </appender>
+
+        <root level="WARN">
+            <appender-ref ref="stdout_json"/>
+        </root>
+
+        <logger name="no.nav.aareg" level="INFO" additivity="false">
+            <appender-ref ref="stdout_json"/>
+        </logger>
+
+        <logger name="org.springframework" level="INFO"/>
+    </springProfile>
+
+    <springProfile name="log-console">
+        <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+            <encoder>
+                <pattern>%date [%-5level] %logger{1} -- %message%n</pattern>
+            </encoder>
+        </appender>
+
+        <root level="WARN">
+            <appender-ref ref="STDOUT"/>
+        </root>
+
+        <logger name="secureLogger" level="INFO" additivity="false">
+            <appender-ref ref="STDOUT"/>
+        </logger>
+
+        <logger name="auditLogger" level="INFO" additivity="false">
+            <appender-ref ref="STDOUT"/>
+        </logger>
+
+        <logger name="no.nav.aareg" level="INFO"/>
+    </springProfile>
+
+</configuration>

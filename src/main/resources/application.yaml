@@ -1,0 +1,22 @@
+springdoc:
+  swagger-ui:
+    url: /openapi-spec.yaml
+management:
+  metrics:
+    distribution:
+      percentiles-histogram:
+        http:
+          server:
+            requests: true
+  endpoints:
+    web:
+      exposure:
+        include: health,prometheus
+spring:
+  main:
+    banner-mode: off
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ${MASKINPORTEN_WELLKNOWN_URL}
