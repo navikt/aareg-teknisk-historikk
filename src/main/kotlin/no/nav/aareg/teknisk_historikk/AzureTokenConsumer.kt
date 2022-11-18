@@ -19,7 +19,7 @@ import java.util.logging.Logger
 data class AzureProperties(
     var clientId: String = "",
     var clientSecret: String = "",
-    var url: String = ""
+    var wellKnownUrl: String = ""
 )
 
 @Component
@@ -30,6 +30,7 @@ class AzureTokenConsumer(
 ) {
     private val log = Logger.getLogger(this::javaClass.name)
 
+    private var oidcConfiguration: OidcConfiguration? = null
     private var token: String? = null
     private var expiry: LocalDateTime? = null
     fun getToken(scopes: List<String?>): String? {
@@ -56,8 +57,11 @@ class AzureTokenConsumer(
     private fun shouldRefresh(expiry: LocalDateTime?) = expiry?.isBefore(now().plusMinutes(1)) ?: true
 
     private fun updateToken(scopes: List<String?>) {
+        if (oidcConfiguration == null) {
+            oidcConfiguration = restTemplate.getForObject(azureProperties.wellKnownUrl, OidcConfiguration::class.java)
+        }
         val formParameters = formParameters(scopes)
-        val responseBody = restTemplate.postForEntity(azureProperties.url, HttpEntity(headers, formParameters), AccessTokenResponse::class.java).body
+        val responseBody = restTemplate.postForEntity(oidcConfiguration?.tokenEndpoint, HttpEntity(headers, formParameters), AccessTokenResponse::class.java).body
         if (responseBody != null) {
             expiry = now().plusSeconds(responseBody.expiresIn)
             token = responseBody.accessToken
@@ -88,6 +92,12 @@ private class AccessTokenResponse {
 
     @JsonProperty("access_token")
     val accessToken: String? = null
+}
+
+@JsonIgnoreProperties(ignoreUnknown = true)
+private class OidcConfiguration {
+    @JsonProperty(value = "token_endpoint", required = true)
+    val tokenEndpoint: String? = null
 }
 
 @ResponseStatus(value = HttpStatus.UNAUTHORIZED)
