@@ -13,7 +13,6 @@ import org.springframework.security.web.authentication.HttpStatusEntryPoint
 @EnableWebSecurity
 open class SecurityConfig {
     @Bean
-    @Throws(Exception::class)
     open fun filterChain(http: HttpSecurity): SecurityFilterChain {
         return http.authorizeHttpRequests {
             it.antMatchers("/api/**")
@@ -24,7 +23,7 @@ open class SecurityConfig {
     }
 
     companion object {
-        private const val SCOPE_KONTROLL_API = "nav:aareg/v1/arbeidsforhold/kontroll"
+        private const val SCOPE_KONTROLL_API = "nav:aareg/v1/arbeidsforhold/tekniskhistorikk"
     }
 }
 
@@ -32,11 +31,11 @@ open class SecurityConfig {
 @Configuration
 open class NoSecurityConfig {
     @Bean
-    @Throws(Exception::class)
     open fun filterChain(http: HttpSecurity): SecurityFilterChain {
-        return http.authorizeHttpRequests {
-            it.antMatchers("**").permitAll()
-        }
+        return http.csrf().disable()
+            .authorizeHttpRequests {
+                it.antMatchers("**").permitAll()
+            }
             .build()
     }
 }

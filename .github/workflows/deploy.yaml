@@ -1,0 +1,61 @@
+name: aareg-teknisk-historikk - Build, push, and deploy
+
+on:
+  push:
+    branches:
+      - 'main'
+    paths:
+      - 'pom.xml'
+      - 'src/**'
+      - '.nais/prod.yaml'
+      - '.nais/dev.yaml'
+
+env:
+  IMAGE: ghcr.io/${{ github.repository }}/aareg-teknisk-historikk:${{ github.sha }}
+
+jobs:
+  build-jar-docker:
+    name: build-jar-docker
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: JDK
+        uses: actions/setup-java@v3
+        with:
+          distribution: zulu
+          java-version: 17
+          cache: maven
+      - name: Build
+        run: mvn clean package
+      - name: Build and publish Docker image
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          docker build --tag ${IMAGE} --build-arg JAR_PATH=apps/$\{{ inputs.appname }}/target/app.jar .
+          docker login ghcr.io -u ${GITHUB_REPOSITORY} -p ${GITHUB_TOKEN}
+          docker push ${IMAGE}
+
+#  deploy-prod:
+#    name: Deploy to NAIS Prod-gcp
+#    needs: build-jar-docker
+#    runs-on: ubuntu-latest
+#    steps:
+#      - uses: actions/checkout@v3
+#      - uses: nais/deploy/actions/deploy@v1
+#        env:
+#          APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
+#          CLUSTER: prod-gcp
+#          RESOURCE: .nais/prod.yaml
+
+#  deploy-dev:
+#    name: Deploy to NAIS Dev-gcp
+#    needs: build-jar-docker
+#    runs-on: ubuntu-latest
+#    steps:
+#      - uses: actions/checkout@v3
+#      - uses: nais/deploy/actions/deploy@v1
+#        env:
+#          APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
+#          CLUSTER: dev-gcp
+#          RESOURCE: .nais/dev.yaml
