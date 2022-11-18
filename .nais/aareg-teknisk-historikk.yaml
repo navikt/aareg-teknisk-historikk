@@ -1,0 +1,53 @@
+apiVersion: nais.io/v1alpha1
+kind: Application
+metadata:
+  name: aareg-teknisk-historikk
+  namespace: arbeidsforhold
+  labels:
+    team: arbeidsforhold
+spec:
+  env:
+    - name: APP_AAREG-SERVICES_URL
+      value: {{aaregservices_url}}
+    - name: SPRING_PROFILES_ACTIVE
+      value: log-logstash
+  image: {{image}}
+  port: 8080
+  ingresses:
+    - https://aareg-teknisk-historikk.ekstern.dev.nav.no
+  replicas:
+    min: 2
+    max: 2
+    cpuThresholdPercentage: 50
+  liveness:
+    path: actuator/health/liveness
+    initialDelay: 60
+    periodSeconds: 2
+    timeout: 2
+    failureThreshold: 30
+  readiness:
+    path: actuator/health/readiness
+    initialDelay: 60
+    periodSeconds: 2
+    timeout: 2
+    failureThreshold: 30
+  resources:
+    requests:
+      cpu: 100m
+      memory: 2048Mi
+    limits:
+      cpu: 1000m
+      memory: 3072Mi
+  prometheus:
+    enabled: true
+    path: actuator/prometheus
+  azure:
+    application:
+      enabled: true
+#  maskinporten:
+#    enabled: true
+#    scopes:
+#      consumes:
+#        - name: nav:aareg/v1/arbeidsforhold/tekniskhistorikk
+  secureLogs:
+    enabled: true
