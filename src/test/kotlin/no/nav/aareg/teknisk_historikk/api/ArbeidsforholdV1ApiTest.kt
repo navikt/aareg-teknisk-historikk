@@ -44,6 +44,12 @@ class ArbeidsforholdV1ApiTest : AaregTekniskHistorikkTest() {
                 okJson("{\"access_token\":\"testtoken\", \"expires_in\": 10000}")
             )
         )
+
+        stubFor(
+            get("/wellknown").willReturn(
+                okJson("{\"token_endpoint\":\"${wmRuntimeInfo.httpBaseUrl}/token\"}")
+            )
+        )
     }
 
     @Test

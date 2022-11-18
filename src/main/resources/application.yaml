@@ -19,4 +19,4 @@ spring:
     oauth2:
       resourceserver:
         jwt:
-          issuer-uri: ${MASKINPORTEN_WELLKNOWN_URL}
+          issuer-uri: ${MASKINPORTEN_WELL_KNOWN_URL}
