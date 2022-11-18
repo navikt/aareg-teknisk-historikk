@@ -44,10 +44,10 @@ spec:
   azure:
     application:
       enabled: true
-#  maskinporten:
-#    enabled: true
-#    scopes:
-#      consumes:
-#        - name: nav:aareg/v1/arbeidsforhold/tekniskhistorikk
+  maskinporten:
+    enabled: true
+    scopes:
+      consumes:
+        - name: nav:aareg/v1/arbeidsforhold/tekniskhistorikk
   secureLogs:
     enabled: true
