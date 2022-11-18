@@ -4,11 +4,6 @@ on:
   push:
     branches:
       - 'main'
-    paths:
-      - 'pom.xml'
-      - 'src/**'
-      - '.nais/prod.yaml'
-      - '.nais/dev.yaml'
 
 env:
   IMAGE: ghcr.io/${{ github.repository }}/aareg-teknisk-historikk:${{ github.sha }}
