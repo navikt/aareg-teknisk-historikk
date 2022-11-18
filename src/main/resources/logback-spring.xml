@@ -20,10 +20,6 @@
             <appender-ref ref="secureLog"/>
         </logger>
 
-        <logger name="auditLogger" level="INFO" additivity="false">
-            <appender-ref ref="auditLog"/>
-        </logger>
-
         <appender name="stdout_json" class="ch.qos.logback.core.ConsoleAppender">
             <encoder class="net.logstash.logback.encoder.LogstashEncoder"/>
         </appender>
@@ -51,10 +47,6 @@
         </root>
 
         <logger name="secureLogger" level="INFO" additivity="false">
-            <appender-ref ref="STDOUT"/>
-        </logger>
-
-        <logger name="auditLogger" level="INFO" additivity="false">
             <appender-ref ref="STDOUT"/>
         </logger>
 
