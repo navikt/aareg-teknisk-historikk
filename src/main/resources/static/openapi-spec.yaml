@@ -20,6 +20,7 @@ paths:
       operationId: finnTekniskHistorikkForArbeidstaker
       requestBody:
         description: Søkeparametere
+        required: true
         content:
           'application/json':
             schema:
@@ -88,6 +89,8 @@ components:
       properties:
         arbeidstakerident:
           type: string
+      required:
+        - type
     Arbeidsforholdgruppe:
       type: object
       description: En liste av arbeidsforhold som tilhører en unik kombinasjon av arbeidstaker/arbeidssted/opplysningspliktig
@@ -166,8 +169,6 @@ components:
           example: '2015-12-31'
         sluttaarsak:
           $ref: '#/components/schemas/Kodeverksentitet'
-        varsling:
-          $ref: '#/components/schemas/Kodeverksentitet'
         sporingsinformasjon:
           $ref: '#/components/schemas/Sporingsinformasjon'
       description: Informasjon knyttet til ansettelsesperiode
@@ -180,8 +181,7 @@ components:
           example: abc-321
         uuid:
           type: string
-          format: uuid
-          description: UUID for arbeidsforholdet (i Aa-registeret). Kan benyttes for oppslag i feks
+          description: Unik id for arbeidsforholdet (i Aa-registeret). Nyere id'er er på UUID-format, men andre formater eksisterer for eldre arbeidsforhold
           example: 54c260b3-344a-48da-b2ab-e472978cd2b4
         type:
           $ref: '#/components/schemas/Kodeverksentitet'
@@ -193,11 +193,6 @@ components:
             $ref: '#/components/schemas/Ansettelsesperiode'
         sporingsinformasjon:
           $ref: '#/components/schemas/Sporingsinformasjon'
-        varsler:
-          type: array
-          description: Liste av unike varsler for ulike entiter
-          items:
-            $ref: '#/components/schemas/Varsel'
       description: Informasjon om arbeidsforhold
     Kodeverksentitet:
       type: object
@@ -233,23 +228,10 @@ components:
       enum:
         - saksbehandler
         - a-ordningen
+        - foer-a-ordningen
         - gjenoppbygging
         - maskinelt-avsluttet
         - patch
-    Varsel:
-      type: object
-      properties:
-        entitet:
-          type: string
-          description: Entitet for varsel
-          enum:
-            - Arbeidsforhold
-            - Ansettelsesperiode
-            - Permisjon
-            - Permittering
-        varsling:
-          $ref: '#/components/schemas/Kodeverksentitet'
-      description: Informasjon om varsel
     TjenestefeilResponse:
       type: object
       properties:
