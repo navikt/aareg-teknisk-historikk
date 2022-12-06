@@ -60,22 +60,20 @@ class AzureTokenConsumer(
         if (oidcConfiguration == null) {
             oidcConfiguration = restTemplate.getForObject(azureProperties.wellKnownUrl, OidcConfiguration::class.java)
         }
-        val formParameters = formParameters(scopes)
-        val responseBody = restTemplate.postForEntity(oidcConfiguration?.tokenEndpoint, HttpEntity(headers, formParameters), AccessTokenResponse::class.java).body
+        val responseBody = restTemplate.postForEntity(oidcConfiguration?.tokenEndpoint, HttpEntity(formParameters(scopes), headers()), AccessTokenResponse::class.java).body
         if (responseBody != null) {
             expiry = now().plusSeconds(responseBody.expiresIn)
             token = responseBody.accessToken
         }
     }
 
-    private val headers: HttpHeaders
-        get() {
-            val headers = HttpHeaders()
-            headers.accept = listOf(MediaType.APPLICATION_JSON)
-            headers.contentType = MediaType.APPLICATION_FORM_URLENCODED
-            headers.setBasicAuth(azureProperties.clientId, azureProperties.clientSecret)
-            return headers
-        }
+    private fun headers(): HttpHeaders {
+        val headers = HttpHeaders()
+        headers.accept = listOf(MediaType.APPLICATION_JSON)
+        headers.contentType = MediaType.APPLICATION_FORM_URLENCODED
+        headers.setBasicAuth(azureProperties.clientId, azureProperties.clientSecret)
+        return headers
+    }
 
     private fun formParameters(scopes: List<String?>): MultiValueMap<String, String> {
         val formParameters: MultiValueMap<String, String> = LinkedMultiValueMap()

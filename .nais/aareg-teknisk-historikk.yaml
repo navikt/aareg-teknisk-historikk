@@ -9,6 +9,8 @@ spec:
   env:
     - name: APP_AAREG-SERVICES_URL
       value: {{aaregservices_url}}
+    - name: APP_AAREG-SERVICES_SCOPE
+      value: {{aaregservices_scope}}
     - name: SPRING_PROFILES_ACTIVE
       value: log-logstash
   image: {{image}}
