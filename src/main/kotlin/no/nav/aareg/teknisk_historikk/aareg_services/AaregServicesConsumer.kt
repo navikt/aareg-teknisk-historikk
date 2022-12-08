@@ -24,7 +24,7 @@ data class AaregServicesConfig(
 
 @Component
 @EnableConfigurationProperties(AaregServicesConfig::class)
-open class AaregServicesConsumer(
+class AaregServicesConsumer(
     private val aaregServicesConfig: AaregServicesConfig,
     private val azureTokenConsumer: AzureTokenConsumer,
     private val restTemplate: RestTemplate
