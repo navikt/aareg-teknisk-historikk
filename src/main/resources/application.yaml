@@ -20,3 +20,4 @@ spring:
       resourceserver:
         jwt:
           issuer-uri: ${MASKINPORTEN_ISSUER}
+          jwk-set-uri: ${MASKINPORTEN_JWKS_URI}
