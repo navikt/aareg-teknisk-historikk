@@ -54,7 +54,8 @@ spec:
       consumes:
         - name: nav:aareg/v1/arbeidsforhold/tekniskhistorikk
   accessPolicy:
-    external:
-      - host: aareg-services.dev-fss-pub.nais.io
+    outbound:
+      external:
+        - host: aareg-services.dev-fss-pub.nais.io
   secureLogs:
     enabled: true
