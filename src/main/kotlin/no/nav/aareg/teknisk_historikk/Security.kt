@@ -4,8 +4,10 @@ import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Profile
 import org.springframework.http.HttpStatus
+import org.springframework.security.config.Customizer
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity
+import org.springframework.security.config.annotation.web.configurers.oauth2.server.resource.OAuth2ResourceServerConfigurer
 import org.springframework.security.web.SecurityFilterChain
 import org.springframework.security.web.authentication.HttpStatusEntryPoint
 
@@ -14,11 +16,12 @@ import org.springframework.security.web.authentication.HttpStatusEntryPoint
 open class SecurityConfig {
     @Bean
     open fun filterChain(http: HttpSecurity): SecurityFilterChain {
-        return http.authorizeHttpRequests {
+        return http.csrf().disable().authorizeHttpRequests {
             it.antMatchers("/api/**")
-                .hasAuthority("SCOPE_${SCOPE_KONTROLL_API}")
+                .hasAnyAuthority("SCOPE_${SCOPE_KONTROLL_API}")
         }
             .exceptionHandling { it.authenticationEntryPoint(HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED)) }
+            .oauth2ResourceServer { obj -> obj.jwt() }
             .build()
     }
 

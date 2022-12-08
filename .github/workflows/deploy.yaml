@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - 'main'
+      - 'security-fix'
 
 env:
   IMAGE: ghcr.io/${{ github.repository }}/aareg-teknisk-historikk:${{ github.sha }}
