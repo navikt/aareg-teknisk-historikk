@@ -6,7 +6,7 @@ import com.github.tomakehurst.wiremock.junit5.WireMockTest
 import no.nav.aareg.teknisk_historikk.AaregTekniskHistorikkTest
 import no.nav.aareg.teknisk_historikk.models.FinnTekniskHistorikkForArbeidstaker200Response
 import no.nav.aareg.teknisk_historikk.models.Soekeparametere
-import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -34,7 +34,7 @@ class ArbeidsforholdV1ApiTest : AaregTekniskHistorikkTest() {
     fun setup(wmRuntimeInfo: WireMockRuntimeInfo) {
         val arbeidsforholdString = hentDataFraRessurs("mocks/arbeidsforhold1.json")
         stubFor(
-            post("/api/v1/arbeidsforhold")
+            get("/api/beta/tekniskhistorikk")
                 .withHeader("Authorization", equalTo("Bearer testtoken"))
                 .willReturn(okJson(arbeidsforholdString))
         )
@@ -59,7 +59,7 @@ class ArbeidsforholdV1ApiTest : AaregTekniskHistorikkTest() {
             HttpEntity(Soekeparametere().apply { arbeidstakerident = "123456789" }),
             FinnTekniskHistorikkForArbeidstaker200Response::class.java
         )
-        Assertions.assertEquals(1, result.body?.antallArbeidsforhold ?: -1)
+        assertEquals(1, result.body?.antallArbeidsforhold ?: -1)
     }
 
     private fun hentDataFraRessurs(filsti: String) = this::class.java.classLoader.getResourceAsStream(filsti)?.let {

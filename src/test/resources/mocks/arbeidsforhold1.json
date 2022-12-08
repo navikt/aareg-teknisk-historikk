@@ -1,68 +1,72 @@
-{
-  "antallArbeidsforhold": 1,
-  "arbeidsforholdForVirksomhet": [
-    {
-      "arbeidstaker": {
-        "type": "Person",
-        "offentligIdent": "123456789123"
-      },
-      "opplysningspliktig": {
-        "type": "Hovedenhet",
-        "offentligIdent": "123456789"
-      },
-      "arbeidssted": {
-        "type": "Underenhet",
-        "offentligIdent": "213456789"
-      },
-      "arbeidsforhold": [
+[
+  {
+    "id": "abc-321",
+    "navUuid": "54c260b3-344a-48da-b2ab-e472978cd2b4",
+    "type": {
+      "kode": "TEST",
+      "beskrivelse": "testbeskrivelse"
+    },
+    "arbeidstaker": {
+      "type": "Person",
+      "identer": [
         {
-          "id": "abc-321",
-          "uuid": "54c260b3-344a-48da-b2ab-e472978cd2b4",
-          "type": {
-            "kode": "TEST",
-            "beskrivelse": "testbeskrivelse"
-          },
-          "rapporteringsordning": {
-            "kode": "TEST",
-            "beskrivelse": "testbeskrivelse"
-          },
-          "ansettelsesperioder": [
-            {
-              "startdato": "2014-07-01",
-              "sluttdato": "2015-12-31",
-              "sluttaarsak": {
-                "kode": "TEST",
-                "beskrivelse": "testbeskrivelse"
-              },
-              "varsling": {
-                "kode": "TEST",
-                "beskrivelse": "testbeskrivelse"
-              },
-              "sporingsinformasjon": {
-                "opprettetTidspunkt": "2018-09-19T12:10:58.059Z",
-                "opprettetAv": "saksbehandler",
-                "slettetTidspunkt": "2018-09-19T12:11:20.79Z",
-                "slettetAv": "saksbehandler"
-              }
-            }
-          ],
-          "sporingsinformasjon": {
-            "opprettetTidspunkt": "2018-09-19T12:10:58.059Z",
-            "opprettetAv": "saksbehandler",
-            "slettetTidspunkt": "2018-09-19T12:11:20.79Z",
-            "slettetAv": "saksbehandler"
-          },
-          "varsler": [
-            {
-              "entitet": "Arbeidsforhold",
-              "varsling": {
-                "kode": "TEST",
-                "beskrivelse": "testbeskrivelse"
-              }
-            }
-          ]
+          "type": "FOLKEREGISTERIDENT",
+          "ident": "123456789123",
+          "gjeldende": true
         }
       ]
+    },
+    "opplysningspliktig": {
+      "type": "Hovedenhet",
+      "identer": [
+        {
+          "type": "ORGANISASJONSNUMMER",
+          "ident": "123456789"
+        }
+      ]
+    },
+    "arbeidssted": {
+      "type": "Underenhet",
+      "identer": [
+        {
+          "type": "ORGANISASJONSNUMMER",
+          "ident": "213456789"
+        }
+      ]
+    },
+    "rapporteringsordning": {
+      "kode": "TEST",
+      "beskrivelse": "testbeskrivelse"
+    },
+    "bruksperiode": {
+      "fom": "2018-09-19T12:10:58.059Z",
+      "tom": "2018-09-19T12:10:58.059Z"
+    },
+    "ansettelsesperioder": [
+      {
+        "startdato": "2014-07-01",
+        "sluttdato": "2015-12-31",
+        "sluttaarsak": {
+          "kode": "TEST",
+          "beskrivelse": "testbeskrivelse"
+        },
+        "bruksperiode": {
+          "fom": "2018-09-19T12:10:58.059Z",
+          "tom": "2018-09-19T12:10:58.059Z"
+        },
+        "sporingsinformasjon": {
+          "opprettetTidspunkt": "2018-09-19T12:10:58.059Z",
+          "opprettetKilde": "EDAG",
+          "endretTidspunkt": "2018-09-19T12:11:20.79Z",
+          "endretKilde": "AVSLUTNING"
+        }
+      }
+    ],
+    "sporingsinformasjon": {
+      "opprettetTidspunkt": "2018-09-19T12:10:58.059Z",
+      "opprettetKilde": "EDAG",
+      "endretTidspunkt": "2018-09-19T12:11:20.79Z",
+      "endretKilde": "AVSLUTNING"
     }
-  ]
-}
+  }
+]
