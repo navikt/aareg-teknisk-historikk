@@ -40,10 +40,10 @@ paths:
                     type: integer
                     example: 1
                     format: int32
-                  arbeidsforholdForVirksomhet:
+                  arbeidsforhold:
                     type: array
                     items:
-                      $ref: '#/components/schemas/Arbeidsforholdgruppe'
+                      $ref: '#/components/schemas/Arbeidsforhold'
         "400":
           description: Ugyldig(e) parameter(e) eller dataelement(er) i forespørsel
           content:
@@ -89,29 +89,21 @@ components:
       properties:
         arbeidstakerident:
           type: string
-      required:
-        - type
-    Arbeidsforholdgruppe:
-      type: object
-      description: En liste av arbeidsforhold som tilhører en unik kombinasjon av arbeidstaker/arbeidssted/opplysningspliktig
-      properties:
-        arbeidstaker:
-          $ref: '#/components/schemas/Person'
+        arbeidsstedident:
+          type: string
         opplysningspliktig:
-          $ref: '#/components/schemas/Hovedenhet'
-        arbeidssted:
-          oneOf:
-            - $ref: '#/components/schemas/Underenhet'
-            - $ref: '#/components/schemas/Person'
-          discriminator:
-            propertyName: type
-          required:
-            - type
-            - offentligIdent
-        arbeidsforhold:
-          type: array
-          items:
-            $ref: '#/components/schemas/Arbeidsforhold'
+          type: string
+        periode:
+          type: object
+          properties:
+            fra:
+              type: string
+              format: date
+            til:
+              type: string
+              format: date
+      required:
+        - arbeidstakerident
     Person:
       type: object
       description: Identtype som representerer en person. 'type' vil alltid være 'Person'
@@ -183,6 +175,26 @@ components:
           type: string
           description: Unik id for arbeidsforholdet (i Aa-registeret). Nyere id'er er på UUID-format, men andre formater eksisterer for eldre arbeidsforhold
           example: 54c260b3-344a-48da-b2ab-e472978cd2b4
+        arbeidstaker:
+          $ref: '#/components/schemas/Person'
+        opplysningspliktig:
+          oneOf:
+            - $ref: '#/components/schemas/Hovedenhet'
+            - $ref: '#/components/schemas/Person'
+          discriminator:
+            propertyName: type
+          required:
+            - type
+            - offentligIdent
+        arbeidssted:
+          oneOf:
+            - $ref: '#/components/schemas/Underenhet'
+            - $ref: '#/components/schemas/Person'
+          discriminator:
+            propertyName: type
+          required:
+            - type
+            - offentligIdent
         type:
           $ref: '#/components/schemas/Kodeverksentitet'
         rapporteringsordning:

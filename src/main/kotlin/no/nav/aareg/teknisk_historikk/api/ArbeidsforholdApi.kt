@@ -26,6 +26,6 @@ class ArbeidsforholdApi(
     override fun getRequest(): Optional<NativeWebRequest> = ofNullable(ServletWebRequest(httpservletRequest))
 
     override fun finnTekniskHistorikkForArbeidstaker(soekeparametere: Soekeparametere): ResponseEntity<FinnTekniskHistorikkForArbeidstaker200Response> {
-        return ok(aaregServicesConsumer.hentArbeidsforholdForArbeidstaker(soekeparametere.arbeidstakerident))
+        return ok(aaregServicesConsumer.hentArbeidsforholdForArbeidstaker(soekeparametere))
     }
 }
