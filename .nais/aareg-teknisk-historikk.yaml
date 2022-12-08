@@ -13,6 +13,8 @@ spec:
       value: {{aaregservices_scope}}
     - name: SPRING_PROFILES_ACTIVE
       value: log-logstash,debug
+    - name: JAVA_OPTS
+      value: '-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=127.0.0.1:8000'
   image: {{image}}
   port: 8080
   ingresses:
