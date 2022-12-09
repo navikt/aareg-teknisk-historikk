@@ -16,7 +16,7 @@ import org.springframework.http.MediaType
 import org.springframework.stereotype.Component
 import org.springframework.web.client.RestTemplate
 
-@ConfigurationProperties(prefix = "app.aareg-services")
+@ConfigurationProperties(prefix = "app.aareg.services")
 data class AaregServicesConfig(
     var url: String = "",
     var scope: String = ""
@@ -24,7 +24,7 @@ data class AaregServicesConfig(
 
 @Component
 @EnableConfigurationProperties(AaregServicesConfig::class)
-open class AaregServicesConsumer(
+class AaregServicesConsumer(
     private val aaregServicesConfig: AaregServicesConfig,
     private val azureTokenConsumer: AzureTokenConsumer,
     private val restTemplate: RestTemplate

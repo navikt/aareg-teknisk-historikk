@@ -4,7 +4,7 @@ spring:
   main:
     banner-mode: off
 
-app.aareg-services:
+app.aareg.services:
   url: '${wiremock.server.baseUrl}'
 azure.app:
   wellKnownUrl: '${wiremock.server.baseUrl}/wellknown'
