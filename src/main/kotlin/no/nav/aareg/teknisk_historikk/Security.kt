@@ -14,11 +14,12 @@ import org.springframework.security.web.authentication.HttpStatusEntryPoint
 open class SecurityConfig {
     @Bean
     open fun filterChain(http: HttpSecurity): SecurityFilterChain {
-        return http.authorizeHttpRequests {
+        return http.csrf().disable().authorizeHttpRequests {
             it.antMatchers("/api/**")
-                .hasAuthority("SCOPE_${SCOPE_KONTROLL_API}")
+                .hasAnyAuthority("SCOPE_${SCOPE_KONTROLL_API}")
         }
             .exceptionHandling { it.authenticationEntryPoint(HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED)) }
+            .oauth2ResourceServer { obj -> obj.jwt() }
             .build()
     }
 

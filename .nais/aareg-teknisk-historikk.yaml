@@ -7,9 +7,9 @@ metadata:
     team: arbeidsforhold
 spec:
   env:
-    - name: APP_AAREG-SERVICES_URL
+    - name: APP_AAREG_SERVICES_URL
       value: {{aaregservices_url}}
-    - name: APP_AAREG-SERVICES_SCOPE
+    - name: APP_AAREG_SERVICES_SCOPE
       value: {{aaregservices_scope}}
     - name: SPRING_PROFILES_ACTIVE
       value: log-logstash
@@ -51,5 +51,9 @@ spec:
     scopes:
       consumes:
         - name: nav:aareg/v1/arbeidsforhold/tekniskhistorikk
+  accessPolicy:
+    outbound:
+      external:
+        - host: aareg-services.dev-fss-pub.nais.io
   secureLogs:
     enabled: true
