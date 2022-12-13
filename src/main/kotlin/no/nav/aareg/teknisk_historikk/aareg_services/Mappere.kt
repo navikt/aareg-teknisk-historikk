@@ -19,7 +19,7 @@ val mapArbeidsforhold = { arbeidsforhold: Arbeidsforhold ->
         arbeidssted = arbeidssted(arbeidsforhold.arbeidssted)
         opplysningspliktig = opplysningspliktig(arbeidsforhold.opplysningspliktig)
         rapporteringsordning = arbeidsforhold.rapporteringsordning
-        ansettelsesperioder = arbeidsforhold.ansettelsesperioder?.map(mapAnsettelsesperiode)
+        ansettelsesperioder = arbeidsforhold.ansettelsesperioder.map(mapAnsettelsesperiode)
         sporingsinformasjon = mapSporingsinformasjon(arbeidsforhold.sporingsinformasjon, arbeidsforhold.bruksperiode.tom != null)
     }
 }
