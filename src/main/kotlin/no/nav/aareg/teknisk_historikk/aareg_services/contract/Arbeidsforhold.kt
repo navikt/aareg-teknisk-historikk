@@ -19,7 +19,7 @@ data class Arbeidsforhold(
     @JsonProperty(value = "opplysningspliktig", required = true)
     var opplysningspliktig: Identobjekt,
     @JsonProperty(value = "ansettelsesperioder", required = false)
-    var ansettelsesperioder: List<Ansettelsesperiode>?,
+    var ansettelsesperioder: List<Ansettelsesperiode>,
     @JsonProperty(value = "rapporteringsordning", required = true)
     var rapporteringsordning: Kodeverksentitet,
     @JsonProperty(value = "sporingsinformasjon", required = true)
