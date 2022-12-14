@@ -3,8 +3,9 @@ spring:
     active: test
   main:
     banner-mode: off
-
 app.aareg.services:
   url: '${wiremock.server.baseUrl}'
 azure.app:
   wellKnownUrl: '${wiremock.server.baseUrl}/wellknown'
+server:
+  port: 23456
