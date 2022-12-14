@@ -1,27 +1,41 @@
 package no.nav.aareg.teknisk_historikk.api
 
+import ch.qos.logback.classic.Level
+import ch.qos.logback.classic.Logger
+import ch.qos.logback.classic.spi.ILoggingEvent
+import ch.qos.logback.core.read.ListAppender
 import com.github.tomakehurst.wiremock.client.WireMock.*
 import com.github.tomakehurst.wiremock.junit5.WireMockRuntimeInfo
 import com.github.tomakehurst.wiremock.junit5.WireMockTest
 import no.nav.aareg.teknisk_historikk.AaregTekniskHistorikkTest
+import no.nav.aareg.teknisk_historikk.Feilkoder
+import no.nav.aareg.teknisk_historikk.WIREMOCK_PORT
+import no.nav.aareg.teknisk_historikk.aareg_services.AaregServicesConsumer
 import no.nav.aareg.teknisk_historikk.models.FinnTekniskHistorikkForArbeidstaker200Response
 import no.nav.aareg.teknisk_historikk.models.Soekeparametere
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertDoesNotThrow
+import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.web.client.TestRestTemplate
 import org.springframework.http.HttpEntity
+import org.springframework.http.HttpStatus
 import java.nio.charset.StandardCharsets.UTF_8
+import java.time.ZonedDateTime
 
-@WireMockTest
+@WireMockTest(httpPort = WIREMOCK_PORT)
 class ArbeidsforholdV1ApiTest : AaregTekniskHistorikkTest() {
+    lateinit var logWatcher: ListAppender<ILoggingEvent>
+
     @Autowired
     lateinit var testRestTemplate: TestRestTemplate
 
     companion object {
         val ENDEPUNKT_URI = "/api/v1/arbeidsforhold"
+        val AAREG_SERVICES_URI = "/api/beta/tekniskhistorikk"
 
         @JvmStatic
         @BeforeAll
@@ -32,13 +46,7 @@ class ArbeidsforholdV1ApiTest : AaregTekniskHistorikkTest() {
 
     @BeforeEach
     fun setup(wmRuntimeInfo: WireMockRuntimeInfo) {
-        val arbeidsforholdString = hentDataFraRessurs("mocks/arbeidsforhold1.json")
-        stubFor(
-            get("/api/beta/tekniskhistorikk")
-                .withHeader("Authorization", equalTo("Bearer testtoken"))
-                .willReturn(okJson(arbeidsforholdString))
-        )
-
+        logWatcher = ListAppender<ILoggingEvent>().apply { this.start() }
         stubFor(
             post("/token").willReturn(
                 okJson("{\"access_token\":\"testtoken\", \"expires_in\": 10000}")
@@ -54,12 +62,120 @@ class ArbeidsforholdV1ApiTest : AaregTekniskHistorikkTest() {
 
     @Test
     fun arbeidsforholdApiTest(wmRuntimeInfo: WireMockRuntimeInfo) {
+        stubFor(
+            get(AAREG_SERVICES_URI)
+                .withHeader("Authorization", equalTo("Bearer testtoken"))
+                .willReturn(okJson(hentDataFraRessurs("mocks/arbeidsforhold1.json")))
+        )
+
         val result = testRestTemplate.postForEntity(
             ENDEPUNKT_URI,
             HttpEntity(Soekeparametere().apply { arbeidstakerident = "123456789" }),
             FinnTekniskHistorikkForArbeidstaker200Response::class.java
         )
         assertEquals(1, result.body?.antallArbeidsforhold ?: -1)
+    }
+
+    @Test
+    fun `mangelfull respons fra aareg services`(wmRuntimeInfo: WireMockRuntimeInfo) {
+        (LoggerFactory.getLogger(AaregServicesConsumer::class.java) as Logger).addAppender(logWatcher)
+        stubFor(
+            get(AAREG_SERVICES_URI)
+                .withHeader("Authorization", equalTo("Bearer testtoken"))
+                .willReturn(okJson("{}"))
+        )
+
+        val result = testRestTemplate.postForEntity(
+            ENDEPUNKT_URI,
+            HttpEntity(Soekeparametere()),
+            Map::class.java
+        )
+
+        assertEquals("Internal Server Error", result.body["error"])
+        assertEquals(Level.ERROR, logWatcher.list.first().level)
+        assertEquals(Feilkoder.AAREG_SERVICES_MALFORMED.toString(), logWatcher.list.first().message)
+    }
+
+    @Test
+    fun `500-feil fra aareg-services kastes ikke videre`(wmRuntimeInfo: WireMockRuntimeInfo) {
+        stubFor(
+            get(AAREG_SERVICES_URI)
+                .withHeader("Authorization", equalTo("Bearer testtoken"))
+                .willReturn(serverError().withBody("Jeg er ikke synlig for brukeren"))
+        )
+
+        val result = testRestTemplate.postForEntity(
+            ENDEPUNKT_URI,
+            HttpEntity(Soekeparametere().apply { arbeidstakerident = "123456789" }),
+            Map::class.java
+        )
+
+        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, result.statusCode)
+        assertEquals(setOf("status", "error", "path", "timestamp"), result.body.keys)
+        assertDoesNotThrow { ZonedDateTime.parse(result.body["timestamp"] as String) }
+        assertEquals(500, result.body["status"])
+        assertEquals("Internal Server Error", result.body["error"])
+        assertEquals("/api/v1/arbeidsforhold", result.body["path"])
+    }
+
+    @Test
+    fun `500-feil fra-aareg-services-logges`(wmRuntimeInfo: WireMockRuntimeInfo) {
+        (LoggerFactory.getLogger(AaregServicesConsumer::class.java) as Logger).addAppender(logWatcher)
+        stubFor(
+            get(AAREG_SERVICES_URI)
+                .withHeader("Authorization", equalTo("Bearer testtoken"))
+                .willReturn(serverError().withBody("Jeg er ikke synlig for brukeren"))
+        )
+
+        val result = testRestTemplate.postForEntity(
+            ENDEPUNKT_URI,
+            HttpEntity(Soekeparametere().apply { arbeidstakerident = "123456789" }),
+            Map::class.java
+        )
+
+        //assertEquals(Feilkoder.AAREG_SERVICES_ERROR.toString(), result.body["error"])
+        assertEquals(Level.ERROR, logWatcher.list.first().level)
+        assertEquals(Feilkoder.AAREG_SERVICES_ERROR.toString(), logWatcher.list.first().message)
+    }
+
+    @Test
+    fun `401-feil fra-aareg-services-logges`(wmRuntimeInfo: WireMockRuntimeInfo) {
+        (LoggerFactory.getLogger(AaregServicesConsumer::class.java) as Logger).addAppender(logWatcher)
+        stubFor(
+            get(AAREG_SERVICES_URI)
+                .withHeader("Authorization", equalTo("Bearer testtoken"))
+                .willReturn(unauthorized().withBody("Jeg er ikke synlig for brukeren"))
+        )
+
+        val result = testRestTemplate.postForEntity(
+            ENDEPUNKT_URI,
+            HttpEntity(Soekeparametere().apply { arbeidstakerident = "123456789" }),
+            Map::class.java
+        )
+
+        //assertEquals(Feilkoder.AAREG_SERVICES_UNAUTHORIZED.toString(), result.body["error"])
+        assertEquals(Level.ERROR, logWatcher.list.first().level)
+        assertEquals(Feilkoder.AAREG_SERVICES_UNAUTHORIZED.toString(), logWatcher.list.first().message)
+    }
+
+    @Test
+    fun `403-feil fra-aareg-services-logges`(wmRuntimeInfo: WireMockRuntimeInfo) {
+        (LoggerFactory.getLogger(AaregServicesConsumer::class.java) as Logger).addAppender(logWatcher)
+        stubFor(
+            get(AAREG_SERVICES_URI)
+                .withHeader("Authorization", equalTo("Bearer testtoken"))
+                .willReturn(forbidden().withBody("Jeg er ikke synlig for brukeren"))
+        )
+
+        val result = testRestTemplate.postForEntity(
+            ENDEPUNKT_URI,
+            HttpEntity(Soekeparametere().apply { arbeidstakerident = "123456789" }),
+            Map::class.java
+        )
+
+        //assertEquals(Feilkoder.AAREG_SERVICES_FORBIDDEN.toString(), result.body["error"])
+        assertEquals(Level.ERROR, logWatcher.list.first().level)
+        assertEquals(Feilkoder.AAREG_SERVICES_FORBIDDEN.toString(), logWatcher.list.first().message)
     }
 
     private fun hentDataFraRessurs(filsti: String) = this::class.java.classLoader.getResourceAsStream(filsti)?.let {

@@ -1,6 +1,6 @@
 package no.nav.aareg.teknisk_historikk.api
 
-import no.nav.aareg.teknisk_historikk.AaregServicesConsumer
+import no.nav.aareg.teknisk_historikk.aareg_services.AaregServicesConsumer
 import no.nav.aareg.teknisk_historikk.models.FinnTekniskHistorikkForArbeidstaker200Response
 import no.nav.aareg.teknisk_historikk.models.Soekeparametere
 import org.springframework.beans.factory.annotation.Autowired
@@ -16,7 +16,7 @@ import javax.servlet.http.HttpServletRequest
 
 @RestController
 class ArbeidsforholdApi(
-    val aaregServicesConsumer: AaregServicesConsumer
+    private val aaregServicesConsumer: AaregServicesConsumer
 ) : ApiApi {
     private val log = Logger.getLogger(this.javaClass.name)
 
