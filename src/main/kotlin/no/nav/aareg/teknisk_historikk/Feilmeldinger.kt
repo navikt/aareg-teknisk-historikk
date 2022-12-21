@@ -5,6 +5,7 @@ import no.nav.aareg.teknisk_historikk.models.TjenestefeilResponse
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.http.ResponseEntity.status
+import org.springframework.web.HttpMediaTypeNotSupportedException
 import org.springframework.web.bind.annotation.ControllerAdvice
 import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.client.HttpClientErrorException.Forbidden
@@ -25,8 +26,11 @@ class Feilmeldinger {
         return status(HttpStatus.INTERNAL_SERVER_ERROR).body(feil.feilrespons())
     }
 
+    @ExceptionHandler(HttpMediaTypeNotSupportedException::class)
+    fun feilMediaType(exception: HttpMediaTypeNotSupportedException, httpServletRequest: HttpServletRequest) =
+        tjenestefeilRespons(HttpStatus.UNSUPPORTED_MEDIA_TYPE, "Feil mediatype: ${httpServletRequest.contentType}")
+
     @ExceptionHandler(Exception::class)
-    fun handler(exception: Throwable, httpServletRequest: HttpServletRequest): ResponseEntity<String> {
-        return status(HttpStatus.INTERNAL_SERVER_ERROR).body("En ukjent feil oppstod")
-    }
+    fun generiskFeil(exception: Throwable, httpServletRequest: HttpServletRequest) =
+        tjenestefeilRespons(HttpStatus.INTERNAL_SERVER_ERROR, "En ukjent feil oppstod")
 }
