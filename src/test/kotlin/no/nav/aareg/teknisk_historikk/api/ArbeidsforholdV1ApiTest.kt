@@ -8,11 +8,13 @@ import com.github.tomakehurst.wiremock.client.WireMock.*
 import com.github.tomakehurst.wiremock.junit5.WireMockRuntimeInfo
 import com.github.tomakehurst.wiremock.junit5.WireMockTest
 import no.nav.aareg.teknisk_historikk.AaregTekniskHistorikkTest
-import no.nav.aareg.teknisk_historikk.Feilkoder
+import no.nav.aareg.teknisk_historikk.Feilkode
+import no.nav.aareg.teknisk_historikk.Feilrespons
 import no.nav.aareg.teknisk_historikk.WIREMOCK_PORT
 import no.nav.aareg.teknisk_historikk.aareg_services.AaregServicesConsumer
 import no.nav.aareg.teknisk_historikk.models.FinnTekniskHistorikkForArbeidstaker200Response
 import no.nav.aareg.teknisk_historikk.models.Soekeparametere
+import no.nav.aareg.teknisk_historikk.models.TjenestefeilResponse
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
@@ -85,12 +87,12 @@ class ArbeidsforholdV1ApiTest : AaregTekniskHistorikkTest() {
         val result = testRestTemplate.postForEntity(
             ENDEPUNKT_URI,
             HttpEntity(Soekeparametere()),
-            String::class.java
+            Feilrespons::class.java
         )
 
-        assertEquals("En ukjent feil oppstod", result.body)
+        assertEquals(Feilrespons(Feilkode.AAREG_SERVICES_MALFORMED), result.body)
         assertEquals(Level.ERROR, logWatcher.list.first().level)
-        assertEquals(Feilkoder.AAREG_SERVICES_MALFORMED.toString(), logWatcher.list.first().message)
+        assertEquals(Feilkode.AAREG_SERVICES_MALFORMED.toString(), logWatcher.list.first().message)
     }
 
     @Test
@@ -104,15 +106,15 @@ class ArbeidsforholdV1ApiTest : AaregTekniskHistorikkTest() {
         val result = testRestTemplate.postForEntity(
             ENDEPUNKT_URI,
             HttpEntity(Soekeparametere().apply { arbeidstakerident = "123456789" }),
-            String::class.java
+            Feilrespons::class.java
         )
 
         assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, result.statusCode)
-        assertEquals("En ukjent feil oppstod", result.body)
+        assertEquals(Feilrespons(Feilkode.AAREG_SERVICES_ERROR), result.body)
     }
 
     @Test
-    fun `500-feil fra-aareg-services-logges`(wmRuntimeInfo: WireMockRuntimeInfo) {
+    fun `500-feil fra aareg-services logges`(wmRuntimeInfo: WireMockRuntimeInfo) {
         (LoggerFactory.getLogger(AaregServicesConsumer::class.java) as Logger).addAppender(logWatcher)
         stubFor(
             get(AAREG_SERVICES_URI)
@@ -123,16 +125,16 @@ class ArbeidsforholdV1ApiTest : AaregTekniskHistorikkTest() {
         val result = testRestTemplate.postForEntity(
             ENDEPUNKT_URI,
             HttpEntity(Soekeparametere().apply { arbeidstakerident = "123456789" }),
-            String::class.java
+            Feilrespons::class.java
         )
 
-        assertEquals("En ukjent feil oppstod", result.body)
+        assertEquals(Feilrespons(Feilkode.AAREG_SERVICES_ERROR), result.body)
         assertEquals(Level.ERROR, logWatcher.list.first().level)
-        assertEquals(Feilkoder.AAREG_SERVICES_ERROR.toString(), logWatcher.list.first().message)
+        assertEquals(Feilkode.AAREG_SERVICES_ERROR.toString(), logWatcher.list.first().message)
     }
 
     @Test
-    fun `401-feil fra-aareg-services-logges`(wmRuntimeInfo: WireMockRuntimeInfo) {
+    fun `401-feil fra aareg-services logges`(wmRuntimeInfo: WireMockRuntimeInfo) {
         (LoggerFactory.getLogger(AaregServicesConsumer::class.java) as Logger).addAppender(logWatcher)
         stubFor(
             get(AAREG_SERVICES_URI)
@@ -143,16 +145,16 @@ class ArbeidsforholdV1ApiTest : AaregTekniskHistorikkTest() {
         val result = testRestTemplate.postForEntity(
             ENDEPUNKT_URI,
             HttpEntity(Soekeparametere().apply { arbeidstakerident = "123456789" }),
-            String::class.java
+            Feilrespons::class.java
         )
 
-        assertEquals("En ukjent feil oppstod", result.body)
+        assertEquals(Feilrespons(Feilkode.AAREG_SERVICES_UNAUTHORIZED), result.body)
         assertEquals(Level.ERROR, logWatcher.list.first().level)
-        assertEquals(Feilkoder.AAREG_SERVICES_UNAUTHORIZED.toString(), logWatcher.list.first().message)
+        assertEquals(Feilkode.AAREG_SERVICES_UNAUTHORIZED.toString(), logWatcher.list.first().message)
     }
 
     @Test
-    fun `403-feil fra-aareg-services-logges`(wmRuntimeInfo: WireMockRuntimeInfo) {
+    fun `403-feil fra aareg-services gir fornuftig feilmelding`(wmRuntimeInfo: WireMockRuntimeInfo) {
         (LoggerFactory.getLogger(AaregServicesConsumer::class.java) as Logger).addAppender(logWatcher)
         stubFor(
             get(AAREG_SERVICES_URI)
@@ -163,12 +165,12 @@ class ArbeidsforholdV1ApiTest : AaregTekniskHistorikkTest() {
         val result = testRestTemplate.postForEntity(
             ENDEPUNKT_URI,
             HttpEntity(Soekeparametere().apply { arbeidstakerident = "123456789" }),
-            String::class.java
+            TjenestefeilResponse::class.java
         )
 
-        assertEquals("En ukjent feil oppstod", result.body)
-        assertEquals(Level.ERROR, logWatcher.list.first().level)
-        assertEquals(Feilkoder.AAREG_SERVICES_FORBIDDEN.toString(), logWatcher.list.first().message)
+        assertEquals(TjenestefeilResponse().apply {
+            meldinger = listOf("Du mangler tilgang til å gjøre oppslag på arbeidstakeren")
+        }, result.body)
     }
 }
 

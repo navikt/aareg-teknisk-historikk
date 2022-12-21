@@ -6,7 +6,8 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.ObjectReader
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import no.nav.aareg.teknisk_historikk.AzureTokenConsumer
-import no.nav.aareg.teknisk_historikk.Feilkoder
+import no.nav.aareg.teknisk_historikk.Feil
+import no.nav.aareg.teknisk_historikk.Feilkode
 import no.nav.aareg.teknisk_historikk.aareg_services.contract.Arbeidsforhold
 import no.nav.aareg.teknisk_historikk.models.*
 import org.slf4j.LoggerFactory
@@ -50,17 +51,20 @@ class AaregServicesConsumer(
                 antallArbeidsforhold = aaregServicesResponse.size
                 arbeidsforhold = aaregServicesResponse.map(mapArbeidsforhold)
             }
+        } catch (e: Forbidden) {
+            throw AaregServicesForbiddenException(e)
         } catch (e: HttpStatusCodeException) {
             val feilkode = when (e) {
-                is Unauthorized -> Feilkoder.AAREG_SERVICES_UNAUTHORIZED
-                is Forbidden -> Feilkoder.AAREG_SERVICES_FORBIDDEN
-                else -> Feilkoder.AAREG_SERVICES_ERROR
+                is Unauthorized -> Feilkode.AAREG_SERVICES_UNAUTHORIZED
+                else -> Feilkode.AAREG_SERVICES_ERROR
             }
-            log.error(feilkode.toString(), e)
-            throw e
+            val feil = Feil(feilkode, e)
+            log.error(feilkode.toString(), feil)
+            throw feil
         } catch (e: JsonMappingException) {
-            log.error(Feilkoder.AAREG_SERVICES_MALFORMED.toString(), e)
-            throw e
+            val feil = Feil(Feilkode.AAREG_SERVICES_MALFORMED, e)
+            log.error(Feilkode.AAREG_SERVICES_MALFORMED.toString(), e)
+            throw feil
         }
     }
 
@@ -77,7 +81,6 @@ class AaregServicesConsumer(
             if (soekeparametere.opplysningspliktig != null) {
                 set("Nav-Opplysningspliktigident", soekeparametere.opplysningspliktig)
             }
-            //TODO filtrering på periode
         }
         return HttpEntity(headers)
     }
@@ -89,4 +92,4 @@ class AaregServicesConsumer(
     }
 }
 
-
+class AaregServicesForbiddenException(e: Forbidden) : Exception(e)
