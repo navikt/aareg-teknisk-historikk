@@ -93,15 +93,6 @@ components:
           type: string
         opplysningspliktig:
           type: string
-        periode:
-          type: object
-          properties:
-            fra:
-              type: string
-              format: date
-            til:
-              type: string
-              format: date
       required:
         - arbeidstakerident
     Person:
