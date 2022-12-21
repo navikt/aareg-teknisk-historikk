@@ -60,18 +60,26 @@ class ArbeidsforholdV1ApiTest : AaregTekniskHistorikkTest() {
     }
 
     @Test
-    fun arbeidsforholdApiTest(wmRuntimeInfo: WireMockRuntimeInfo) {
+    fun `bruker sendte inn gyldige data`(wmRuntimeInfo: WireMockRuntimeInfo) {
         stubFor(
             get(AAREG_SERVICES_URI)
                 .withHeader("Authorization", equalTo("Bearer testtoken"))
+                .withHeader("Nav-Personident", equalTo("123456789"))
+                .withHeader("Nav-Opplysningspliktigident", equalTo("123456"))
+                .withHeader("Nav-Arbeidsstedident", equalTo("12345"))
                 .willReturn(okJson(arbeidsforhold1))
         )
 
         val result = testRestTemplate.postForEntity(
             ENDEPUNKT_URI,
-            HttpEntity(Soekeparametere().apply { arbeidstakerident = "123456789" }),
+            HttpEntity(Soekeparametere().apply{
+                arbeidstakerident = "123456789"
+                opplysningspliktig = "123456"
+                arbeidsstedident = "12345"
+            }),
             FinnTekniskHistorikkForArbeidstaker200Response::class.java
         )
+
         assertEquals(1, result.body?.antallArbeidsforhold ?: -1)
     }
 
@@ -86,7 +94,9 @@ class ArbeidsforholdV1ApiTest : AaregTekniskHistorikkTest() {
 
         val result = testRestTemplate.postForEntity(
             ENDEPUNKT_URI,
-            HttpEntity(Soekeparametere()),
+            HttpEntity(Soekeparametere().apply {
+                arbeidstakerident = "1234567890"
+            }),
             Feilrespons::class.java
         )
 
@@ -131,6 +141,67 @@ class ArbeidsforholdV1ApiTest : AaregTekniskHistorikkTest() {
         assertEquals(Feilrespons(Feilkode.AAREG_SERVICES_ERROR), result.body)
         assertEquals(Level.ERROR, logWatcher.list.first().level)
         assertEquals(Feilkode.AAREG_SERVICES_ERROR.toString(), logWatcher.list.first().message)
+    }
+
+    @Test
+    fun `bruker sendte ikke inn json`(wmRuntimeInfo: WireMockRuntimeInfo) {
+        val result = testRestTemplate.postForEntity(
+            ENDEPUNKT_URI,
+            HttpEntity(""),
+            TjenestefeilResponse::class.java
+        )
+
+        assertEquals(HttpStatus.UNSUPPORTED_MEDIA_TYPE, result.statusCode)
+        assertEquals(TjenestefeilResponse().apply {
+            meldinger = listOf("Feil mediatype: text/plain;charset=UTF-8")
+        }, result.body)
+    }
+
+    @Test
+    fun `bruker sendte ikke inn json-objekt`(wmRuntimeInfo: WireMockRuntimeInfo) {
+        val result = testRestTemplate.postForEntity(
+            ENDEPUNKT_URI,
+            HttpEntity(emptyList<String>()),
+            TjenestefeilResponse::class.java
+        )
+
+        assertEquals(TjenestefeilResponse().apply {
+            meldinger = listOf(IKKE_LESBAR_FEILMELDING)
+        }, result.body)
+    }
+
+    @Test
+    fun `bruker sendte ikke inn arbeidstaker`(wmRuntimeInfo: WireMockRuntimeInfo) {
+        val result = testRestTemplate.postForEntity(
+            ENDEPUNKT_URI,
+            HttpEntity(Soekeparametere()),
+            TjenestefeilResponse::class.java
+        )
+
+        assertEquals(TjenestefeilResponse().apply {
+            meldinger = listOf(ARBEIDSTAKER_MAA_VAERE_TALL)
+        }, result.body)
+    }
+
+    @Test
+    fun `bruker sendte ikke inn kun tall for verdiene`(wmRuntimeInfo: WireMockRuntimeInfo) {
+        val result = testRestTemplate.postForEntity(
+            ENDEPUNKT_URI,
+            HttpEntity(Soekeparametere().apply{
+                arbeidstakerident = "abcd1234"
+                opplysningspliktig = "abcd1234"
+                arbeidsstedident = "abcd1234"
+            }),
+            TjenestefeilResponse::class.java
+        )
+
+        assertEquals(TjenestefeilResponse().apply {
+            meldinger = listOf(
+                ARBEIDSTAKER_MAA_VAERE_TALL,
+                OPPLYSNINGSPLIKTIG_MAA_VAERE_TALL,
+                ARBEIDSSTED_MAA_VAERE_TALL
+            )
+        }, result.body)
     }
 
     @Test
