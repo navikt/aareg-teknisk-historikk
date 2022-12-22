@@ -7,9 +7,6 @@ info:
   contact:
     name: Team Arbeidsforhold
     url: https://navikt.github.io/aareg/tjenester/integrasjon/tekniskapi/
-servers:
-  - url: https://aareg-teknisk-historikk.ekstern.dev.nav.no
-    description: Testmiljø
 paths:
   /api/v1/arbeidsforhold:
     post:
