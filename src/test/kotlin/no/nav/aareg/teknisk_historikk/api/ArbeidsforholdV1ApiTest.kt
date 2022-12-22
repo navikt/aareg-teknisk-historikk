@@ -24,6 +24,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.web.client.TestRestTemplate
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpStatus
+import org.springframework.http.client.MultipartBodyBuilder
 
 @WireMockTest(httpPort = WIREMOCK_PORT)
 class ArbeidsforholdV1ApiTest : AaregTekniskHistorikkTest() {
@@ -72,7 +73,7 @@ class ArbeidsforholdV1ApiTest : AaregTekniskHistorikkTest() {
 
         val result = testRestTemplate.postForEntity(
             ENDEPUNKT_URI,
-            HttpEntity(Soekeparametere().apply{
+            HttpEntity(Soekeparametere().apply {
                 arbeidstakerident = "123456789"
                 opplysningspliktig = "123456"
                 arbeidsstedident = "12345"
@@ -144,6 +145,19 @@ class ArbeidsforholdV1ApiTest : AaregTekniskHistorikkTest() {
     }
 
     @Test
+    fun `get i stedet for post`(wmRuntimeInfo: WireMockRuntimeInfo) {
+        val result = testRestTemplate.getForEntity(
+            ENDEPUNKT_URI,
+            TjenestefeilResponse::class.java
+        )
+
+        assertEquals(HttpStatus.METHOD_NOT_ALLOWED, result.statusCode)
+        assertEquals(TjenestefeilResponse().apply {
+            meldinger = listOf("Http-verb ikke tillatt: GET", "Verb som er støttet: POST")
+        }, result.body)
+    }
+
+    @Test
     fun `bruker sendte ikke inn json`(wmRuntimeInfo: WireMockRuntimeInfo) {
         val result = testRestTemplate.postForEntity(
             ENDEPUNKT_URI,
@@ -153,7 +167,7 @@ class ArbeidsforholdV1ApiTest : AaregTekniskHistorikkTest() {
 
         assertEquals(HttpStatus.UNSUPPORTED_MEDIA_TYPE, result.statusCode)
         assertEquals(TjenestefeilResponse().apply {
-            meldinger = listOf("Feil mediatype: text/plain;charset=UTF-8")
+            meldinger = listOf("Feil mediatype: text/plain;charset=UTF-8", "Støttede typer: application/json")
         }, result.body)
     }
 
@@ -187,7 +201,7 @@ class ArbeidsforholdV1ApiTest : AaregTekniskHistorikkTest() {
     fun `bruker sendte ikke inn kun tall for verdiene`(wmRuntimeInfo: WireMockRuntimeInfo) {
         val result = testRestTemplate.postForEntity(
             ENDEPUNKT_URI,
-            HttpEntity(Soekeparametere().apply{
+            HttpEntity(Soekeparametere().apply {
                 arbeidstakerident = "abcd1234"
                 opplysningspliktig = "abcd1234"
                 arbeidsstedident = "abcd1234"

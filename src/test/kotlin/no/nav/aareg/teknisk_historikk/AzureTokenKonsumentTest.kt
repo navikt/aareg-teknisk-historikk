@@ -55,12 +55,13 @@ class AzureTokenKonsumentTest : AaregTekniskHistorikkTest() {
         stubFor(
             get(AAREG_SERVICES_URI)
                 .withHeader("Authorization", equalTo("Bearer testtoken"))
+                .withHeader("Nav-Personident", equalTo("123456"))
                 .willReturn(okJson("[]"))
         )
 
         val result = testRestTemplate.postForEntity(
             ENDEPUNKT_URI,
-            HttpEntity(Soekeparametere()),
+            HttpEntity(Soekeparametere().apply { arbeidstakerident = "123456" }),
             FinnTekniskHistorikkForArbeidstaker200Response::class.java
         )
 
