@@ -24,7 +24,8 @@ val EKSEMPEL_SOEK = ObjectMapper().writerFor(Soekeparametere::class.java).writeV
     arbeidsstedident = null
 })
 
-val IKKE_LESBAR_FEILMELDING = "Kunne ikke lese søkeforespørselen. Eksempel på gyldig json: $EKSEMPEL_SOEK"
+val IKKE_LESBAR_FEILMELDING = "Kunne ikke lese søkeforespørselen. Eksempel på gyldig søk: $EKSEMPEL_SOEK"
+const val ARBEIDSTAKER_ER_PAAKREVD = "arbeidstakerident er et påkrevd felt"
 const val ARBEIDSTAKER_MAA_VAERE_TALL = "arbeidstakerident må kun være tall"
 const val OPPLYSNINGSPLIKTIG_MAA_VAERE_TALL = "opplysningspliktig må kun være tall"
 const val ARBEIDSSTED_MAA_VAERE_TALL = "arbeidssted må kun være tall"
@@ -47,6 +48,7 @@ class ArbeidsforholdApi(
     private fun validerSoekeparametere(soekeparametere: Soekeparametere) {
         val allNumbersMatcher = "\\d+".toRegex()
         val valideringsfeil = listOf(
+            if (soekeparametere.arbeidstakerident == null) ARBEIDSTAKER_ER_PAAKREVD else null,
             if (soekeparametere.arbeidstakerident?.matches(allNumbersMatcher) != true) ARBEIDSTAKER_MAA_VAERE_TALL else null,
             if (soekeparametere.opplysningspliktig != null && !soekeparametere.opplysningspliktig.matches(allNumbersMatcher)) OPPLYSNINGSPLIKTIG_MAA_VAERE_TALL else null,
             if (soekeparametere.arbeidsstedident != null && !soekeparametere.arbeidsstedident.matches(allNumbersMatcher)) ARBEIDSSTED_MAA_VAERE_TALL else null

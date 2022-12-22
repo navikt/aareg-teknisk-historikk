@@ -192,8 +192,9 @@ class ArbeidsforholdV1ApiTest : AaregTekniskHistorikkTest() {
             TjenestefeilResponse::class.java
         )
 
+        assertEquals(HttpStatus.BAD_REQUEST, result.statusCode)
         assertEquals(TjenestefeilResponse().apply {
-            meldinger = listOf(ARBEIDSTAKER_MAA_VAERE_TALL)
+            meldinger = listOf(ARBEIDSTAKER_ER_PAAKREVD, ARBEIDSTAKER_MAA_VAERE_TALL)
         }, result.body)
     }
 
