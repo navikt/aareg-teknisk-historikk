@@ -75,7 +75,7 @@ class ArbeidsforholdV1ApiTest : AaregTekniskHistorikkTest() {
             ENDEPUNKT_URI,
             HttpEntity(gyldigSoekeparameter().apply {
                 opplysningspliktig = "123456"
-                arbeidsstedident = "12345"
+                arbeidssted = "12345"
             }, headerMedAutentisering()),
             FinnTekniskHistorikkForArbeidstaker200Response::class.java
         )
@@ -203,9 +203,9 @@ class ArbeidsforholdV1ApiTest : AaregTekniskHistorikkTest() {
         val result = testRestTemplate.postForEntity(
             ENDEPUNKT_URI,
             HttpEntity(Soekeparametere().apply {
-                arbeidstakerident = "abcd1234"
+                arbeidstaker = "abcd1234"
                 opplysningspliktig = "abcd1234"
-                arbeidsstedident = "abcd1234"
+                arbeidssted = "abcd1234"
             }, headerMedKorrelasjonsId()),
             TjenestefeilResponse::class.java
         )
@@ -267,7 +267,7 @@ fun headerMedKorrelasjonsId() = HttpHeaders().apply {
 }
 
 fun gyldigSoekeparameter() = Soekeparametere().apply {
-    arbeidstakerident = "123456789"
+    arbeidstaker = "123456789"
 }
 
 fun tjenestefeilMedMelding(vararg melding: String) = TjenestefeilResponse().apply {

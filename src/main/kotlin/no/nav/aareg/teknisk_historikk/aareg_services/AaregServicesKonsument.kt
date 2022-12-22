@@ -77,9 +77,9 @@ class AaregServicesConsumer(
             contentType = MediaType.APPLICATION_JSON
             set("Nav-Call-Id", appName)
             set(KORRELASJONSID_HEADER, MDC.get(KORRELASJONSID_HEADER))
-            set("Nav-Personident", soekeparametere.arbeidstakerident)
-            if (soekeparametere.arbeidsstedident != null) {
-                set("Nav-Arbeidsstedident", soekeparametere.arbeidsstedident)
+            set("Nav-Personident", soekeparametere.arbeidstaker)
+            if (soekeparametere.arbeidssted != null) {
+                set("Nav-Arbeidsstedident", soekeparametere.arbeidssted)
             }
             if (soekeparametere.opplysningspliktig != null) {
                 set("Nav-Opplysningspliktigident", soekeparametere.opplysningspliktig)
