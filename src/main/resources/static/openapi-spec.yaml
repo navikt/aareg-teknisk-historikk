@@ -81,14 +81,14 @@ components:
     Soekeparametere:
       type: object
       properties:
-        arbeidstakerident:
+        arbeidstaker:
           type: string
-        arbeidsstedident:
+        arbeidssted:
           type: string
         opplysningspliktig:
           type: string
       required:
-        - arbeidstakerident
+        - arbeidstaker
     Person:
       type: object
       description: Identtype som representerer en person. 'type' vil alltid være 'Person'
