@@ -25,9 +25,6 @@ paths:
           'application/json':
             schema:
               $ref: '#/components/schemas/Soekeparametere'
-          'multipart/form-data':
-            schema:
-              $ref: '#/components/schemas/Soekeparametere'
       responses:
         "200":
           description: Vellykket forespørsel
