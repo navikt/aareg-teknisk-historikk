@@ -20,11 +20,8 @@ class Feilmeldinger {
     private val secureLog = LoggerFactory.getLogger("secureLogger")
 
     @ExceptionHandler(AaregServicesForbiddenException::class)
-    fun forbiddenHandler(forbidden: Forbidden, httpServletRequest: HttpServletRequest): ResponseEntity<TjenestefeilResponse> {
-        return status(HttpStatus.FORBIDDEN).body(
-            TjenestefeilResponse().apply { meldinger = listOf("Du mangler tilgang til å gjøre oppslag på arbeidstakeren") }
-        )
-    }
+    fun forbiddenHandler(forbidden: Forbidden, httpServletRequest: HttpServletRequest) =
+        tjenestefeilRespons(httpServletRequest, HttpStatus.FORBIDDEN, "Du mangler tilgang til å gjøre oppslag på arbeidstakeren")
 
     @ExceptionHandler(Feil::class)
     fun feilhandler(feil: Feil, httpServletRequest: HttpServletRequest): ResponseEntity<Feilrespons> {
@@ -34,6 +31,7 @@ class Feilmeldinger {
     @ExceptionHandler(HttpMediaTypeNotSupportedException::class)
     fun feilMediaType(exception: HttpMediaTypeNotSupportedException, httpServletRequest: HttpServletRequest) =
         tjenestefeilRespons(
+            httpServletRequest,
             HttpStatus.UNSUPPORTED_MEDIA_TYPE,
             "Feil mediatype: ${httpServletRequest.contentType}",
             "Støttede typer: ${exception.supportedMediaTypes.joinToString(", ")}"
@@ -42,6 +40,7 @@ class Feilmeldinger {
     @ExceptionHandler(HttpRequestMethodNotSupportedException::class)
     fun feilRequestType(exception: HttpRequestMethodNotSupportedException, httpServletRequest: HttpServletRequest) =
         tjenestefeilRespons(
+            httpServletRequest,
             HttpStatus.METHOD_NOT_ALLOWED,
             "Http-verb ikke tillatt: ${httpServletRequest.method}",
             "Verb som er støttet: ${exception.supportedHttpMethods?.joinToString(", ")}"
@@ -51,6 +50,6 @@ class Feilmeldinger {
     fun generiskFeil(exception: Throwable, httpServletRequest: HttpServletRequest): ResponseEntity<TjenestefeilResponse> {
         log.error("Uhåndtert feil oppstod. Sjekk sikker log for detaljer")
         secureLog.error("Uhåndtert feil oppstod", exception)
-        return tjenestefeilRespons(HttpStatus.INTERNAL_SERVER_ERROR, "En ukjent feil oppstod")
+        return tjenestefeilRespons(httpServletRequest, HttpStatus.INTERNAL_SERVER_ERROR, "En ukjent feil oppstod")
     }
 }

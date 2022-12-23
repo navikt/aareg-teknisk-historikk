@@ -7,10 +7,7 @@ import ch.qos.logback.core.read.ListAppender
 import com.github.tomakehurst.wiremock.client.WireMock.*
 import com.github.tomakehurst.wiremock.junit5.WireMockRuntimeInfo
 import com.github.tomakehurst.wiremock.junit5.WireMockTest
-import no.nav.aareg.teknisk_historikk.AaregTekniskHistorikkTest
-import no.nav.aareg.teknisk_historikk.Feilkode
-import no.nav.aareg.teknisk_historikk.Feilrespons
-import no.nav.aareg.teknisk_historikk.WIREMOCK_PORT
+import no.nav.aareg.teknisk_historikk.*
 import no.nav.aareg.teknisk_historikk.aareg_services.AaregServicesConsumer
 import no.nav.aareg.teknisk_historikk.models.FinnTekniskHistorikkForArbeidstaker200Response
 import no.nav.aareg.teknisk_historikk.models.Soekeparametere
@@ -23,6 +20,8 @@ import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.web.client.TestRestTemplate
 import org.springframework.http.HttpEntity
+import org.springframework.http.HttpHeaders
+import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
 
 @WireMockTest(httpPort = WIREMOCK_PORT)
@@ -142,56 +141,59 @@ class ArbeidsforholdV1ApiTest : AaregTekniskHistorikkTest() {
 
     @Test
     fun `get i stedet for post`(wmRuntimeInfo: WireMockRuntimeInfo) {
-        val result = testRestTemplate.getForEntity(
+        val result = testRestTemplate.exchange(
             ENDEPUNKT_URI,
+            HttpMethod.GET,
+            HttpEntity<Void>(headerMedKorrelasjonsId()),
             TjenestefeilResponse::class.java
         )
 
         assertEquals(HttpStatus.METHOD_NOT_ALLOWED, result.statusCode)
-        assertEquals(TjenestefeilResponse().apply {
-            meldinger = listOf("Http-verb ikke tillatt: GET", "Verb som er støttet: POST")
-        }, result.body)
+        assertEquals(
+            tjenestefeilMedMelding("Http-verb ikke tillatt: GET", "Verb som er støttet: POST"),
+            result.body
+        )
     }
 
     @Test
     fun `bruker sendte ikke inn json`(wmRuntimeInfo: WireMockRuntimeInfo) {
         val result = testRestTemplate.postForEntity(
             ENDEPUNKT_URI,
-            HttpEntity(""),
+            HttpEntity("", headerMedKorrelasjonsId()),
             TjenestefeilResponse::class.java
         )
 
         assertEquals(HttpStatus.UNSUPPORTED_MEDIA_TYPE, result.statusCode)
-        assertEquals(TjenestefeilResponse().apply {
-            meldinger = listOf("Feil mediatype: text/plain;charset=UTF-8", "Støttede typer: application/json")
-        }, result.body)
+        assertEquals(
+            tjenestefeilMedMelding("Feil mediatype: text/plain;charset=UTF-8", "Støttede typer: application/json"),
+            result.body
+        )
     }
 
     @Test
     fun `bruker sendte ikke inn json-objekt`(wmRuntimeInfo: WireMockRuntimeInfo) {
         val result = testRestTemplate.postForEntity(
             ENDEPUNKT_URI,
-            HttpEntity(emptyList<String>()),
+            HttpEntity(emptyList<String>(), headerMedKorrelasjonsId()),
             TjenestefeilResponse::class.java
         )
 
-        assertEquals(TjenestefeilResponse().apply {
-            meldinger = listOf(IKKE_LESBAR_FEILMELDING)
-        }, result.body)
+        assertEquals(tjenestefeilMedMelding(IKKE_LESBAR_FEILMELDING), result.body)
     }
 
     @Test
     fun `bruker sendte ikke inn arbeidstaker`(wmRuntimeInfo: WireMockRuntimeInfo) {
         val result = testRestTemplate.postForEntity(
             ENDEPUNKT_URI,
-            HttpEntity(Soekeparametere()),
+            HttpEntity(Soekeparametere(), headerMedKorrelasjonsId()),
             TjenestefeilResponse::class.java
         )
 
         assertEquals(HttpStatus.BAD_REQUEST, result.statusCode)
-        assertEquals(TjenestefeilResponse().apply {
-            meldinger = listOf(ARBEIDSTAKER_ER_PAAKREVD, ARBEIDSTAKER_MAA_VAERE_TALL)
-        }, result.body)
+        assertEquals(
+            tjenestefeilMedMelding(ARBEIDSTAKER_ER_PAAKREVD, ARBEIDSTAKER_MAA_VAERE_TALL),
+            result.body
+        )
     }
 
     @Test
@@ -202,17 +204,17 @@ class ArbeidsforholdV1ApiTest : AaregTekniskHistorikkTest() {
                 arbeidstakerident = "abcd1234"
                 opplysningspliktig = "abcd1234"
                 arbeidsstedident = "abcd1234"
-            }),
+            }, headerMedKorrelasjonsId()),
             TjenestefeilResponse::class.java
         )
 
-        assertEquals(TjenestefeilResponse().apply {
-            meldinger = listOf(
+        assertEquals(
+            tjenestefeilMedMelding(
                 ARBEIDSTAKER_MAA_VAERE_TALL,
                 OPPLYSNINGSPLIKTIG_MAA_VAERE_TALL,
                 ARBEIDSSTED_MAA_VAERE_TALL
-            )
-        }, result.body)
+            ), result.body
+        )
     }
 
     @Test
@@ -246,18 +248,26 @@ class ArbeidsforholdV1ApiTest : AaregTekniskHistorikkTest() {
 
         val result = testRestTemplate.postForEntity(
             ENDEPUNKT_URI,
-            HttpEntity(gyldigSoekeparameter()),
+            HttpEntity(gyldigSoekeparameter(), headerMedKorrelasjonsId()),
             TjenestefeilResponse::class.java
         )
 
-        assertEquals(TjenestefeilResponse().apply {
-            meldinger = listOf("Du mangler tilgang til å gjøre oppslag på arbeidstakeren")
-        }, result.body)
+        assertEquals(
+            tjenestefeilMedMelding("Du mangler tilgang til å gjøre oppslag på arbeidstakeren"),
+            result.body
+        )
     }
 }
 
-public fun gyldigSoekeparameter() = Soekeparametere().apply {
+fun headerMedKorrelasjonsId() = HttpHeaders().apply { set(KORRELASJONSID_HEADER, "korrelasjonsid") }
+
+fun gyldigSoekeparameter() = Soekeparametere().apply {
     arbeidstakerident = "123456789"
+}
+
+fun tjenestefeilMedMelding(vararg melding: String) = TjenestefeilResponse().apply {
+    korrelasjonsid = "korrelasjonsid"
+    meldinger = melding.asList()
 }
 
 private val arbeidsforhold1 = """
