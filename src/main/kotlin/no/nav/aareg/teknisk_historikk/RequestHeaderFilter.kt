@@ -13,8 +13,16 @@ const val KORRELASJONSID_HEADER = "correlation-id"
 @Component
 class RequestHeaderFilter : OncePerRequestFilter() {
     override fun doFilterInternal(req: HttpServletRequest, response: HttpServletResponse, filterChain: FilterChain) {
-        MDC.put(KORRELASJONSID_HEADER, req.getHeader(KORRELASJONSID_HEADER) ?: randomUUID().toString())
+        try {
+            val korrelasjonsid = req.getHeader(KORRELASJONSID_HEADER) ?: randomUUID().toString()
 
-        filterChain.doFilter(req, response)
+            MDC.put(KORRELASJONSID_HEADER, korrelasjonsid)
+            req.setAttribute(KORRELASJONSID_HEADER, korrelasjonsid)
+            response.addHeader(KORRELASJONSID_HEADER, korrelasjonsid)
+
+            filterChain.doFilter(req, response)
+        } finally {
+            MDC.remove(KORRELASJONSID_HEADER)
+        }
     }
 }

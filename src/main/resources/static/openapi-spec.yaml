@@ -232,6 +232,9 @@ components:
     TjenestefeilResponse:
       type: object
       properties:
+        korrelasjonsid:
+          type: string
+          description: Id som kan sendes til Nav for bruk i feilsøk
         meldinger:
           type: array
           description: Liste med informasjon om hva som er feil
