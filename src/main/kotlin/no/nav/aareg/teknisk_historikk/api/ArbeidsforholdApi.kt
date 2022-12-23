@@ -60,11 +60,11 @@ class ArbeidsforholdApi(
 
     @ExceptionHandler(HttpMessageNotReadableException::class)
     fun ikkeLesbarFeil(exception: HttpMessageNotReadableException, httpServletRequest: HttpServletRequest) =
-        tjenestefeilRespons(HttpStatus.BAD_REQUEST, IKKE_LESBAR_FEILMELDING)
+        tjenestefeilRespons(httpServletRequest, HttpStatus.BAD_REQUEST, IKKE_LESBAR_FEILMELDING)
 
     @ExceptionHandler(Valideringsfeil::class)
     fun ikkeLesbarFeil(exception: Valideringsfeil, httpServletRequest: HttpServletRequest) =
-        tjenestefeilRespons(HttpStatus.BAD_REQUEST, exception.feilmeldinger)
+        tjenestefeilRespons(httpServletRequest, HttpStatus.BAD_REQUEST, exception.feilmeldinger)
 }
 
 class Valideringsfeil(val feilmeldinger: List<String>) : Throwable()
