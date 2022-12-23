@@ -8,9 +8,12 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import no.nav.aareg.teknisk_historikk.AzureTokenConsumer
 import no.nav.aareg.teknisk_historikk.Feil
 import no.nav.aareg.teknisk_historikk.Feilkode
+import no.nav.aareg.teknisk_historikk.KORRELASJONSID_HEADER
 import no.nav.aareg.teknisk_historikk.aareg_services.contract.Arbeidsforhold
 import no.nav.aareg.teknisk_historikk.models.*
 import org.slf4j.LoggerFactory
+import org.slf4j.MDC
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.context.properties.ConfigurationProperties
 import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.http.HttpEntity
@@ -34,7 +37,8 @@ data class AaregServicesConfig(
 class AaregServicesConsumer(
     private val aaregServicesConfig: AaregServicesConfig,
     private val azureTokenConsumer: AzureTokenConsumer,
-    private val restTemplate: RestTemplate
+    private val restTemplate: RestTemplate,
+    @Value("\${app.name}") private val appName: String
 ) {
     private val log = LoggerFactory.getLogger(this.javaClass.name)
     fun hentArbeidsforholdForArbeidstaker(soekeparametere: Soekeparametere): FinnTekniskHistorikkForArbeidstaker200Response {
@@ -74,6 +78,8 @@ class AaregServicesConsumer(
                 azureTokenConsumer.getToken(listOf(aaregServicesConfig.scope))
             )
             contentType = MediaType.APPLICATION_JSON
+            set("Nav-Call-Id", appName)
+            set(KORRELASJONSID_HEADER, MDC.get(KORRELASJONSID_HEADER))
             set("Nav-Personident", soekeparametere.arbeidstakerident)
             if (soekeparametere.arbeidsstedident != null) {
                 set("Nav-Arbeidsstedident", soekeparametere.arbeidsstedident)

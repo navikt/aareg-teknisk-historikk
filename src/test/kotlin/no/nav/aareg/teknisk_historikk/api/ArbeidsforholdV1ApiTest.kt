@@ -24,7 +24,6 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.web.client.TestRestTemplate
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpStatus
-import org.springframework.http.client.MultipartBodyBuilder
 
 @WireMockTest(httpPort = WIREMOCK_PORT)
 class ArbeidsforholdV1ApiTest : AaregTekniskHistorikkTest() {
@@ -73,8 +72,7 @@ class ArbeidsforholdV1ApiTest : AaregTekniskHistorikkTest() {
 
         val result = testRestTemplate.postForEntity(
             ENDEPUNKT_URI,
-            HttpEntity(Soekeparametere().apply {
-                arbeidstakerident = "123456789"
+            HttpEntity(gyldigSoekeparameter().apply {
                 opplysningspliktig = "123456"
                 arbeidsstedident = "12345"
             }),
@@ -95,9 +93,7 @@ class ArbeidsforholdV1ApiTest : AaregTekniskHistorikkTest() {
 
         val result = testRestTemplate.postForEntity(
             ENDEPUNKT_URI,
-            HttpEntity(Soekeparametere().apply {
-                arbeidstakerident = "1234567890"
-            }),
+            HttpEntity(gyldigSoekeparameter()),
             Feilrespons::class.java
         )
 
@@ -116,7 +112,7 @@ class ArbeidsforholdV1ApiTest : AaregTekniskHistorikkTest() {
 
         val result = testRestTemplate.postForEntity(
             ENDEPUNKT_URI,
-            HttpEntity(Soekeparametere().apply { arbeidstakerident = "123456789" }),
+            HttpEntity(gyldigSoekeparameter()),
             Feilrespons::class.java
         )
 
@@ -135,7 +131,7 @@ class ArbeidsforholdV1ApiTest : AaregTekniskHistorikkTest() {
 
         val result = testRestTemplate.postForEntity(
             ENDEPUNKT_URI,
-            HttpEntity(Soekeparametere().apply { arbeidstakerident = "123456789" }),
+            HttpEntity(gyldigSoekeparameter()),
             Feilrespons::class.java
         )
 
@@ -230,7 +226,7 @@ class ArbeidsforholdV1ApiTest : AaregTekniskHistorikkTest() {
 
         val result = testRestTemplate.postForEntity(
             ENDEPUNKT_URI,
-            HttpEntity(Soekeparametere().apply { arbeidstakerident = "123456789" }),
+            HttpEntity(gyldigSoekeparameter()),
             Feilrespons::class.java
         )
 
@@ -250,7 +246,7 @@ class ArbeidsforholdV1ApiTest : AaregTekniskHistorikkTest() {
 
         val result = testRestTemplate.postForEntity(
             ENDEPUNKT_URI,
-            HttpEntity(Soekeparametere().apply { arbeidstakerident = "123456789" }),
+            HttpEntity(gyldigSoekeparameter()),
             TjenestefeilResponse::class.java
         )
 
@@ -258,6 +254,10 @@ class ArbeidsforholdV1ApiTest : AaregTekniskHistorikkTest() {
             meldinger = listOf("Du mangler tilgang til å gjøre oppslag på arbeidstakeren")
         }, result.body)
     }
+}
+
+public fun gyldigSoekeparameter() = Soekeparametere().apply {
+    arbeidstakerident = "123456789"
 }
 
 private val arbeidsforhold1 = """
