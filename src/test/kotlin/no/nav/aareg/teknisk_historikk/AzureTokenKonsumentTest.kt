@@ -11,6 +11,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.mockito.Mockito
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.web.client.TestRestTemplate
 import org.springframework.http.HttpEntity
@@ -37,6 +38,7 @@ class AzureTokenKonsumentTest : AaregTekniskHistorikkTest() {
     @BeforeEach
     fun setup(wmRuntimeInfo: WireMockRuntimeInfo) {
         logWatcher = ListAppender<ILoggingEvent>().apply { this.start() }
+        Mockito.`when`(jwtDecoder.decode(testToken)).thenReturn(testJwt)
 
         stubFor(
             get("/wellknown").willReturn(
@@ -60,7 +62,7 @@ class AzureTokenKonsumentTest : AaregTekniskHistorikkTest() {
 
         val result = testRestTemplate.postForEntity(
             ENDEPUNKT_URI,
-            HttpEntity(gyldigSoekeparameter()),
+            HttpEntity(gyldigSoekeparameter(), headerMedAutentisering()),
             FinnTekniskHistorikkForArbeidstaker200Response::class.java
         )
 
