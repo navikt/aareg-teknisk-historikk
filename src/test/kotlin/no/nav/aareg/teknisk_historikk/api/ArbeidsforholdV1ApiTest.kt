@@ -16,6 +16,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.mockito.Mockito
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.web.client.TestRestTemplate
@@ -45,6 +46,7 @@ class ArbeidsforholdV1ApiTest : AaregTekniskHistorikkTest() {
     @BeforeEach
     fun setup(wmRuntimeInfo: WireMockRuntimeInfo) {
         logWatcher = ListAppender<ILoggingEvent>().apply { this.start() }
+        Mockito.`when`(jwtDecoder.decode(testToken)).thenReturn(testJwt)
         stubFor(
             post("/token").willReturn(
                 okJson("{\"access_token\":\"testtoken\", \"expires_in\": 10000}")
@@ -74,7 +76,7 @@ class ArbeidsforholdV1ApiTest : AaregTekniskHistorikkTest() {
             HttpEntity(gyldigSoekeparameter().apply {
                 opplysningspliktig = "123456"
                 arbeidsstedident = "12345"
-            }),
+            }, headerMedAutentisering()),
             FinnTekniskHistorikkForArbeidstaker200Response::class.java
         )
 
@@ -92,7 +94,7 @@ class ArbeidsforholdV1ApiTest : AaregTekniskHistorikkTest() {
 
         val result = testRestTemplate.postForEntity(
             ENDEPUNKT_URI,
-            HttpEntity(gyldigSoekeparameter()),
+            HttpEntity(gyldigSoekeparameter(), headerMedAutentisering()),
             Feilrespons::class.java
         )
 
@@ -111,7 +113,7 @@ class ArbeidsforholdV1ApiTest : AaregTekniskHistorikkTest() {
 
         val result = testRestTemplate.postForEntity(
             ENDEPUNKT_URI,
-            HttpEntity(gyldigSoekeparameter()),
+            HttpEntity(gyldigSoekeparameter(), headerMedAutentisering()),
             Feilrespons::class.java
         )
 
@@ -130,7 +132,7 @@ class ArbeidsforholdV1ApiTest : AaregTekniskHistorikkTest() {
 
         val result = testRestTemplate.postForEntity(
             ENDEPUNKT_URI,
-            HttpEntity(gyldigSoekeparameter()),
+            HttpEntity(gyldigSoekeparameter(), headerMedAutentisering()),
             Feilrespons::class.java
         )
 
@@ -228,7 +230,7 @@ class ArbeidsforholdV1ApiTest : AaregTekniskHistorikkTest() {
 
         val result = testRestTemplate.postForEntity(
             ENDEPUNKT_URI,
-            HttpEntity(gyldigSoekeparameter()),
+            HttpEntity(gyldigSoekeparameter(), headerMedAutentisering()),
             Feilrespons::class.java
         )
 
@@ -259,7 +261,10 @@ class ArbeidsforholdV1ApiTest : AaregTekniskHistorikkTest() {
     }
 }
 
-fun headerMedKorrelasjonsId() = HttpHeaders().apply { set(KORRELASJONSID_HEADER, "korrelasjonsid") }
+fun headerMedKorrelasjonsId() = HttpHeaders().apply {
+    set(KORRELASJONSID_HEADER, "korrelasjonsid")
+    set("Authorization", "Bearer $testToken")
+}
 
 fun gyldigSoekeparameter() = Soekeparametere().apply {
     arbeidstakerident = "123456789"

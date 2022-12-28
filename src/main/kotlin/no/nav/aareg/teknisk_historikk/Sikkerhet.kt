@@ -1,15 +1,12 @@
 package no.nav.aareg.teknisk_historikk
 
 import org.springframework.context.annotation.Bean
-import org.springframework.context.annotation.Configuration
-import org.springframework.context.annotation.Profile
 import org.springframework.http.HttpStatus
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity
 import org.springframework.security.web.SecurityFilterChain
 import org.springframework.security.web.authentication.HttpStatusEntryPoint
 
-@Profile("!test")
 @EnableWebSecurity
 open class SecurityConfig {
     @Bean
@@ -22,21 +19,6 @@ open class SecurityConfig {
             .oauth2ResourceServer { obj -> obj.jwt() }
             .build()
     }
-
-    companion object {
-        private const val SCOPE_KONTROLL_API = "nav:aareg/v1/arbeidsforhold/tekniskhistorikk"
-    }
 }
 
-@Profile("test")
-@Configuration
-open class NoSecurityConfig {
-    @Bean
-    open fun filterChain(http: HttpSecurity): SecurityFilterChain {
-        return http.csrf().disable()
-            .authorizeHttpRequests {
-                it.antMatchers("**").permitAll()
-            }
-            .build()
-    }
-}
+const val SCOPE_KONTROLL_API = "nav:aareg/v1/arbeidsforhold/tekniskhistorikk"
