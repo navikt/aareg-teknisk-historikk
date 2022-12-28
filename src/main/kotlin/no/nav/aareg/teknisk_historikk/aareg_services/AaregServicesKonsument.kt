@@ -5,10 +5,7 @@ import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.ObjectReader
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
-import no.nav.aareg.teknisk_historikk.AzureTokenConsumer
-import no.nav.aareg.teknisk_historikk.Feil
-import no.nav.aareg.teknisk_historikk.Feilkode
-import no.nav.aareg.teknisk_historikk.KORRELASJONSID_HEADER
+import no.nav.aareg.teknisk_historikk.*
 import no.nav.aareg.teknisk_historikk.aareg_services.contract.Arbeidsforhold
 import no.nav.aareg.teknisk_historikk.models.*
 import org.slf4j.LoggerFactory
@@ -87,6 +84,9 @@ class AaregServicesConsumer(
             if (soekeparametere.opplysningspliktig != null) {
                 set("Nav-Opplysningspliktigident", soekeparametere.opplysningspliktig)
             }
+            val orgNr = hentOrgnrFraToken()
+            set("Nav-Konsument", orgNr.konsument)
+            if (orgNr.databehandler != null) set("Nav-Databehandler", orgNr.databehandler)
         }
         return HttpEntity(headers)
     }

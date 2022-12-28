@@ -25,6 +25,14 @@ const val testToken =
 const val testorg = "98765432"
 const val testsupplier = "89765432"
 
+private val jwtClaims = mapOf(
+    JwtClaimNames.SUB to "testUser",
+    "scope" to "nav:aareg/v1/arbeidsforhold/tekniskhistorikk",
+    "consumer" to mapOf(
+        "ID" to "1234:$testorg"
+    )
+)
+
 val testJwt = Jwt(
     "token",
     Instant.now(),
@@ -32,12 +40,17 @@ val testJwt = Jwt(
     mapOf(
         "alg" to "none"
     ),
+    jwtClaims
+)
+
+val testJwtMedDatabehandler = Jwt(
+    "token",
+    Instant.now(),
+    Instant.MAX,
     mapOf(
-        JwtClaimNames.SUB to "testUser",
-        "scope" to "nav:aareg/v1/arbeidsforhold/tekniskhistorikk",
-        "consumer" to mapOf(
-            "ID" to "1234:$testorg"
-        ),
+        "alg" to "none"
+    ),
+    jwtClaims.plus(
         "supplier" to mapOf(
             "ID" to "1234:$testsupplier"
         )
