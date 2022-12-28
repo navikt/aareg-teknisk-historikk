@@ -11,10 +11,10 @@ import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.mockito.Mockito
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.web.client.TestRestTemplate
 import org.springframework.http.HttpEntity
-import org.springframework.http.HttpHeaders
 
 @WireMockTest(httpPort = WIREMOCK_PORT)
 class RequestHeaderFilterTest : AaregTekniskHistorikkTest() {
@@ -37,6 +37,7 @@ class RequestHeaderFilterTest : AaregTekniskHistorikkTest() {
     @BeforeEach
     fun setup(wmRuntimeInfo: WireMockRuntimeInfo) {
         logWatcher = ListAppender<ILoggingEvent>().apply { this.start() }
+        Mockito.`when`(jwtDecoder.decode(testToken)).thenReturn(testJwt)
         WireMock.stubFor(
             WireMock.post("/token").willReturn(
                 WireMock.okJson("{\"access_token\":\"testtoken\", \"expires_in\": 10000}")
@@ -63,7 +64,7 @@ class RequestHeaderFilterTest : AaregTekniskHistorikkTest() {
 
         val result = testRestTemplate.postForEntity(
             ENDEPUNKT_URI,
-            HttpEntity(gyldigSoekeparameter(), HttpHeaders().apply { set(KORRELASJONSID_HEADER, "test-korrelasjons-id") }),
+            HttpEntity(gyldigSoekeparameter(), headerMedAutentisering().apply { set(KORRELASJONSID_HEADER, "test-korrelasjons-id") }),
             FinnTekniskHistorikkForArbeidstaker200Response::class.java
         )
 
