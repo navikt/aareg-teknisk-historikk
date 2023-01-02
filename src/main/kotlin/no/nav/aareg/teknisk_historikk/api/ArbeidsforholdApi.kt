@@ -2,6 +2,7 @@ package no.nav.aareg.teknisk_historikk.api
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import no.nav.aareg.teknisk_historikk.aareg_services.AaregServicesKonsument
+import no.nav.aareg.teknisk_historikk.aareg_services.mapArbeidsforhold
 import no.nav.aareg.teknisk_historikk.models.FinnTekniskHistorikkForArbeidstaker200Response
 import no.nav.aareg.teknisk_historikk.models.Soekeparametere
 import no.nav.aareg.teknisk_historikk.tjenestefeilRespons
@@ -31,18 +32,20 @@ const val OPPLYSNINGSPLIKTIG_MAA_VAERE_TALL = "opplysningspliktig må kun være 
 const val ARBEIDSSTED_MAA_VAERE_TALL = "arbeidssted må kun være tall"
 
 @RestController
-class ArbeidsforholdApi(
-    private val aaregServicesKonsument: AaregServicesKonsument
-) : ApiApi {
+class ArbeidsforholdApi(private val aaregServicesKonsument: AaregServicesKonsument) : ApiApi {
 
     @Autowired
-    lateinit var httpservletRequest: HttpServletRequest
+    private lateinit var httpservletRequest: HttpServletRequest
 
     override fun getRequest(): Optional<NativeWebRequest> = ofNullable(ServletWebRequest(httpservletRequest))
 
     override fun finnTekniskHistorikkForArbeidstaker(soekeparametere: Soekeparametere): ResponseEntity<FinnTekniskHistorikkForArbeidstaker200Response> {
         validerSoekeparametere(soekeparametere)
-        return ok(aaregServicesKonsument.hentArbeidsforholdForArbeidstaker(soekeparametere))
+        val arbeidsforholdliste = aaregServicesKonsument.hentArbeidsforholdForArbeidstaker(soekeparametere)
+        return ok(FinnTekniskHistorikkForArbeidstaker200Response().apply {
+            antallArbeidsforhold = arbeidsforholdliste.size
+            arbeidsforhold = arbeidsforholdliste.map(mapArbeidsforhold)
+        })
     }
 
     private fun validerSoekeparametere(soekeparametere: Soekeparametere) {
@@ -63,7 +66,7 @@ class ArbeidsforholdApi(
         tjenestefeilRespons(httpServletRequest, HttpStatus.BAD_REQUEST, IKKE_LESBAR_FEILMELDING)
 
     @ExceptionHandler(Valideringsfeil::class)
-    fun ikkeLesbarFeil(exception: Valideringsfeil, httpServletRequest: HttpServletRequest) =
+    fun valideringsfeil(exception: Valideringsfeil, httpServletRequest: HttpServletRequest) =
         tjenestefeilRespons(httpServletRequest, HttpStatus.BAD_REQUEST, exception.feilmeldinger)
 }
 
