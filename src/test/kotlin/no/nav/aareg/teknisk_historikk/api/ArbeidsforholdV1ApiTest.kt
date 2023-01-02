@@ -48,7 +48,7 @@ class ArbeidsforholdV1ApiTest : AaregTekniskHistorikkTest() {
         Mockito.`when`(jwtDecoder.decode(testToken)).thenReturn(testJwt)
         stubFor(
             post("/token").willReturn(
-                okJson("{\"access_token\":\"testtoken\", \"expires_in\": 10000}")
+                okJson("{\"access_token\":\"$testAzureToken\", \"expires_in\": 10000}")
             )
         )
 
