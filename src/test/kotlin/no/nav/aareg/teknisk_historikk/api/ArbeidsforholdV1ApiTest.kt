@@ -8,7 +8,8 @@ import com.github.tomakehurst.wiremock.client.WireMock.*
 import com.github.tomakehurst.wiremock.junit5.WireMockRuntimeInfo
 import com.github.tomakehurst.wiremock.junit5.WireMockTest
 import no.nav.aareg.teknisk_historikk.*
-import no.nav.aareg.teknisk_historikk.aareg_services.AaregServicesConsumer
+import no.nav.aareg.teknisk_historikk.aareg_services.AaregServicesKonsument
+import no.nav.aareg.teknisk_historikk.aareg_services.AaregServicesKonsumentFeilmeldinger
 import no.nav.aareg.teknisk_historikk.models.FinnTekniskHistorikkForArbeidstaker200Response
 import no.nav.aareg.teknisk_historikk.models.Soekeparametere
 import no.nav.aareg.teknisk_historikk.models.TjenestefeilResponse
@@ -48,7 +49,7 @@ class ArbeidsforholdV1ApiTest : AaregTekniskHistorikkTest() {
         Mockito.`when`(jwtDecoder.decode(testToken)).thenReturn(testJwt)
         stubFor(
             post("/token").willReturn(
-                okJson("{\"access_token\":\"$testAzureToken\", \"expires_in\": 10000}")
+                okJson("{\"access_token\":\"$testAzureToken\", \"expires_in\": 10}")
             )
         )
 
@@ -83,20 +84,21 @@ class ArbeidsforholdV1ApiTest : AaregTekniskHistorikkTest() {
 
     @Test
     fun `mangelfull respons fra aareg services`(wmRuntimeInfo: WireMockRuntimeInfo) {
-        (LoggerFactory.getLogger(AaregServicesConsumer::class.java) as Logger).addAppender(logWatcher)
+        (LoggerFactory.getLogger(AaregServicesKonsument::class.java) as Logger).addAppender(logWatcher)
+        (LoggerFactory.getLogger(AaregServicesKonsumentFeilmeldinger::class.java) as Logger).addAppender(logWatcher)
         stubFor(
             get(AAREG_SERVICES_URI).willReturn(okJson("{}"))
         )
 
         val result = testRestTemplate.postForEntity(
             ENDEPUNKT_URI,
-            HttpEntity(gyldigSoekeparameter(), headerMedAutentisering()),
-            Feilrespons::class.java
+            HttpEntity(gyldigSoekeparameter(), headerMedAutentiseringOgKorrelasjon()),
+            TjenestefeilResponse::class.java
         )
 
-        assertEquals(Feilrespons(Feilkode.AAREG_SERVICES_MALFORMED), result.body)
         assertEquals(Level.ERROR, logWatcher.list.first().level)
         assertEquals(Feilkode.AAREG_SERVICES_MALFORMED.toString(), logWatcher.list.first().message)
+        assertEquals(tjenestefeilMedMelding(Feilkode.AAREG_SERVICES_MALFORMED.toString()), result.body)
     }
 
     @Test
@@ -107,28 +109,28 @@ class ArbeidsforholdV1ApiTest : AaregTekniskHistorikkTest() {
 
         val result = testRestTemplate.postForEntity(
             ENDEPUNKT_URI,
-            HttpEntity(gyldigSoekeparameter(), headerMedAutentisering()),
-            Feilrespons::class.java
+            HttpEntity(gyldigSoekeparameter(), headerMedAutentiseringOgKorrelasjon()),
+            TjenestefeilResponse::class.java
         )
 
         assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, result.statusCode)
-        assertEquals(Feilrespons(Feilkode.AAREG_SERVICES_ERROR), result.body)
+        assertEquals(tjenestefeilMedMelding(Feilkode.AAREG_SERVICES_ERROR.toString()), result.body)
     }
 
     @Test
     fun `500-feil fra aareg-services logges`(wmRuntimeInfo: WireMockRuntimeInfo) {
-        (LoggerFactory.getLogger(AaregServicesConsumer::class.java) as Logger).addAppender(logWatcher)
+        (LoggerFactory.getLogger(AaregServicesKonsumentFeilmeldinger::class.java) as Logger).addAppender(logWatcher)
         stubFor(
             get(AAREG_SERVICES_URI).willReturn(serverError().withBody("Jeg er ikke synlig for brukeren"))
         )
 
         val result = testRestTemplate.postForEntity(
             ENDEPUNKT_URI,
-            HttpEntity(gyldigSoekeparameter(), headerMedAutentisering()),
-            Feilrespons::class.java
+            HttpEntity(gyldigSoekeparameter(), headerMedAutentiseringOgKorrelasjon()),
+            TjenestefeilResponse::class.java
         )
 
-        assertEquals(Feilrespons(Feilkode.AAREG_SERVICES_ERROR), result.body)
+        assertEquals(tjenestefeilMedMelding(Feilkode.AAREG_SERVICES_ERROR.toString()), result.body)
         assertEquals(Level.ERROR, logWatcher.list.first().level)
         assertEquals(Feilkode.AAREG_SERVICES_ERROR.toString(), logWatcher.list.first().message)
     }
@@ -159,7 +161,10 @@ class ArbeidsforholdV1ApiTest : AaregTekniskHistorikkTest() {
 
         assertEquals(HttpStatus.UNSUPPORTED_MEDIA_TYPE, result.statusCode)
         assertEquals(
-            tjenestefeilMedMelding("Feil mediatype: text/plain;charset=UTF-8", "Støttede typer: application/json"),
+            tjenestefeilMedMelding(
+                "Feil mediatype: text/plain;charset=UTF-8",
+                "Støttede typer: application/json"
+            ),
             result.body
         )
     }
@@ -213,25 +218,25 @@ class ArbeidsforholdV1ApiTest : AaregTekniskHistorikkTest() {
 
     @Test
     fun `401-feil fra aareg-services logges`(wmRuntimeInfo: WireMockRuntimeInfo) {
-        (LoggerFactory.getLogger(AaregServicesConsumer::class.java) as Logger).addAppender(logWatcher)
+        (LoggerFactory.getLogger(AaregServicesKonsumentFeilmeldinger::class.java) as Logger).addAppender(logWatcher)
         stubFor(
             get(AAREG_SERVICES_URI).willReturn(unauthorized().withBody("Jeg er ikke synlig for brukeren"))
         )
 
         val result = testRestTemplate.postForEntity(
             ENDEPUNKT_URI,
-            HttpEntity(gyldigSoekeparameter(), headerMedAutentisering()),
-            Feilrespons::class.java
+            HttpEntity(gyldigSoekeparameter(), headerMedAutentiseringOgKorrelasjon()),
+            TjenestefeilResponse::class.java
         )
 
-        assertEquals(Feilrespons(Feilkode.AAREG_SERVICES_UNAUTHORIZED), result.body)
+        assertEquals(tjenestefeilMedMelding(Feilkode.AAREG_SERVICES_UNAUTHORIZED.toString()), result.body)
         assertEquals(Level.ERROR, logWatcher.list.first().level)
         assertEquals(Feilkode.AAREG_SERVICES_UNAUTHORIZED.toString(), logWatcher.list.first().message)
     }
 
     @Test
     fun `403-feil fra aareg-services gir fornuftig feilmelding`(wmRuntimeInfo: WireMockRuntimeInfo) {
-        (LoggerFactory.getLogger(AaregServicesConsumer::class.java) as Logger).addAppender(logWatcher)
+        (LoggerFactory.getLogger(AaregServicesKonsumentFeilmeldinger::class.java) as Logger).addAppender(logWatcher)
         stubFor(
             get(AAREG_SERVICES_URI).willReturn(forbidden().withBody("Jeg er ikke synlig for brukeren"))
         )
@@ -243,7 +248,7 @@ class ArbeidsforholdV1ApiTest : AaregTekniskHistorikkTest() {
         )
 
         assertEquals(
-            tjenestefeilMedMelding("Du mangler tilgang til å gjøre oppslag på arbeidstakeren"),
+            tjenestefeilMedMelding(Feilkode.AAREG_SERVICES_FORBIDDEN.toString()),
             result.body
         )
     }
