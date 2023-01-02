@@ -23,8 +23,9 @@ fun HttpHeaders.medAutentisering(): HttpHeaders {
     return this
 }
 
-fun HttpHeaders.medKorrelasjonsid(): HttpHeaders {
-    set(KORRELASJONSID_HEADER, "korrelasjonsid")
+fun HttpHeaders.medKorrelasjonsid() = this.medKorrelasjonsid("korrelasjonsid")
+fun HttpHeaders.medKorrelasjonsid(korrelasjonsid: String): HttpHeaders {
+    set(KORRELASJONSID_HEADER, korrelasjonsid)
     return this
 }
 

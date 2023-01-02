@@ -15,6 +15,7 @@ import org.mockito.Mockito
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.web.client.TestRestTemplate
 import org.springframework.http.HttpEntity
+import org.springframework.http.HttpStatus
 
 @WireMockTest(httpPort = WIREMOCK_PORT)
 class RequestHeaderFilterTest : AaregTekniskHistorikkTest() {
@@ -40,7 +41,7 @@ class RequestHeaderFilterTest : AaregTekniskHistorikkTest() {
         Mockito.`when`(jwtDecoder.decode(testToken)).thenReturn(testJwt)
         WireMock.stubFor(
             WireMock.post("/token").willReturn(
-                WireMock.okJson("{\"access_token\":\"testtoken\", \"expires_in\": 10000}")
+                WireMock.okJson("{\"access_token\":\"$testAzureToken\", \"expires_in\": 10000}")
             )
         )
 
@@ -52,22 +53,38 @@ class RequestHeaderFilterTest : AaregTekniskHistorikkTest() {
     }
 
     @Test
-    fun `aareg-services mottar call-id og korrelasjons-id`(wmRuntimeInfo: WireMockRuntimeInfo) {
+    fun `aareg-services mottar korrelasjons-id`(wmRuntimeInfo: WireMockRuntimeInfo) {
         WireMock.stubFor(
             WireMock.get(AAREG_SERVICES_URI)
-                .withHeader("Authorization", WireMock.equalTo("Bearer testtoken"))
-                .withHeader("Nav-Personident", WireMock.equalTo("123456789"))
                 .withHeader("Nav-Call-Id", WireMock.equalTo("aareg-teknisk-historikk-test"))
+                .willReturn(WireMock.okJson("[]"))
+        )
+
+        val result = testRestTemplate.postForEntity(
+            ENDEPUNKT_URI,
+            HttpEntity(gyldigSoekeparameter(), headerMedAutentisering()),
+            FinnTekniskHistorikkForArbeidstaker200Response::class.java
+        )
+
+        Assertions.assertEquals(HttpStatus.OK, result.statusCode)
+        Assertions.assertEquals(0, result.body?.antallArbeidsforhold)
+    }
+
+    @Test
+    fun `aareg-services mottar call-id`(wmRuntimeInfo: WireMockRuntimeInfo) {
+        WireMock.stubFor(
+            WireMock.get(AAREG_SERVICES_URI)
                 .withHeader(KORRELASJONSID_HEADER, WireMock.equalTo("test-korrelasjons-id"))
                 .willReturn(WireMock.okJson("[]"))
         )
 
         val result = testRestTemplate.postForEntity(
             ENDEPUNKT_URI,
-            HttpEntity(gyldigSoekeparameter(), headerMedAutentisering().apply { set(KORRELASJONSID_HEADER, "test-korrelasjons-id") }),
+            HttpEntity(gyldigSoekeparameter(), headerMedAutentisering().medKorrelasjonsid("test-korrelasjons-id")),
             FinnTekniskHistorikkForArbeidstaker200Response::class.java
         )
 
+        Assertions.assertEquals(HttpStatus.OK, result.statusCode)
         Assertions.assertEquals(0, result.body?.antallArbeidsforhold)
     }
 }
