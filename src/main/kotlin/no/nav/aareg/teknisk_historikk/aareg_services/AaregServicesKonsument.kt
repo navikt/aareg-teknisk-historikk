@@ -10,7 +10,6 @@ import no.nav.aareg.teknisk_historikk.aareg_services.contract.Arbeidsforhold
 import no.nav.aareg.teknisk_historikk.models.*
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import org.slf4j.MDC
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.context.properties.ConfigurationProperties
 import org.springframework.boot.context.properties.EnableConfigurationProperties
@@ -40,19 +39,14 @@ class AaregServicesKonsument(
     private val restTemplate: RestTemplate,
     @Value("\${app.name}") private val appName: String
 ) {
-    fun hentArbeidsforholdForArbeidstaker(soekeparametere: Soekeparametere): FinnTekniskHistorikkForArbeidstaker200Response {
+    fun hentArbeidsforholdForArbeidstaker(soekeparametere: Soekeparametere): List<Arbeidsforhold> {
         try {
-            val aaregServicesResponse: List<Arbeidsforhold> = restTemplate.exchange(
+            return restTemplate.exchange(
                 "${aaregServicesConfig.url}/api/beta/tekniskhistorikk",
                 HttpMethod.GET,
                 createRequestEntity(soekeparametere), String::class.java
             ).body.let {
                 reader.readValue(it)
-            }
-
-            return FinnTekniskHistorikkForArbeidstaker200Response().apply {
-                antallArbeidsforhold = aaregServicesResponse.size
-                arbeidsforhold = aaregServicesResponse.map(mapArbeidsforhold)
             }
         } catch (e: Forbidden) {
             throw AaregServicesForbiddenException(e)
@@ -68,31 +62,18 @@ class AaregServicesKonsument(
     }
 
     private fun createRequestEntity(soekeparametere: Soekeparametere): HttpEntity<JsonNode> {
-        val headers = HttpHeaders().apply {
-            setBearerAuth(
-                azureTokenConsumer.getToken(listOf(aaregServicesConfig.scope))
-            )
-            contentType = MediaType.APPLICATION_JSON
-            set("Nav-Call-Id", appName)
-            set(KORRELASJONSID_HEADER, MDC.get(KORRELASJONSID_HEADER))
-            set("Nav-Personident", soekeparametere.arbeidstaker)
-            if (soekeparametere.arbeidssted != null) {
-                set("Nav-Arbeidsstedident", soekeparametere.arbeidssted)
+        return HttpEntity(
+            HttpHeaders().apply {
+                setBearerAuth(
+                    azureTokenConsumer.getToken(listOf(aaregServicesConfig.scope))
+                )
+                contentType = MediaType.APPLICATION_JSON
+                set("Nav-Call-Id", appName)
             }
-            if (soekeparametere.opplysningspliktig != null) {
-                set("Nav-Opplysningspliktigident", soekeparametere.opplysningspliktig)
-            }
-            val orgNr = hentOrgnrFraToken()
-            set("Nav-Konsument", orgNr.konsument)
-            if (orgNr.databehandler != null) set("Nav-Databehandler", orgNr.databehandler)
-        }
-        return HttpEntity(headers)
-    }
-
-    companion object {
-        val reader: ObjectReader = ObjectMapper().apply {
-            this.registerModule(JavaTimeModule())
-        }.readerForListOf(Arbeidsforhold::class.java)
+                .medKonsumentOgDatabehandler()
+                .medSoekeparametere(soekeparametere)
+                .medKorrelasjonsid()
+        )
     }
 }
 
@@ -119,6 +100,20 @@ class AaregServicesKonsumentFeilmeldinger {
         )
     }
 }
+
+fun HttpHeaders.medSoekeparametere(soekeparametere: Soekeparametere) = HttpHeaders(this).apply {
+    set("Nav-Personident", soekeparametere.arbeidstaker)
+    if (soekeparametere.arbeidssted != null) {
+        set("Nav-Arbeidsstedident", soekeparametere.arbeidssted)
+    }
+    if (soekeparametere.opplysningspliktig != null) {
+        set("Nav-Opplysningspliktigident", soekeparametere.opplysningspliktig)
+    }
+}
+
+private val reader: ObjectReader = ObjectMapper().apply {
+    this.registerModule(JavaTimeModule())
+}.readerForListOf(Arbeidsforhold::class.java)
 
 private class AaregServicesForbiddenException(e: Forbidden) : Exception(e)
 

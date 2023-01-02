@@ -1,11 +1,12 @@
 package no.nav.aareg.teknisk_historikk
 
 import com.nimbusds.jose.util.JSONObjectUtils
+import org.springframework.http.HttpHeaders
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.security.oauth2.jwt.Jwt
 import java.text.ParseException
 
-fun hentOrgnrFraToken(): OrgnummerFraMaskinportenToken {
+private fun hentOrgnrFraToken(): OrgnummerFraMaskinportenToken {
     val principal = SecurityContextHolder.getContext().authentication.principal
     val claims = if (principal is Jwt) principal.claims else HashMap()
     var konsument = ""
@@ -29,6 +30,14 @@ private fun hentOrgnrFraClaim(claims: Map<String, Any>, key: String): String {
     }
 }
 
-data class OrgnummerFraMaskinportenToken(val konsument: String, val databehandler: String?)
+fun HttpHeaders.medKonsumentOgDatabehandler() =
+    HttpHeaders(this).apply {
+        val orgNr = hentOrgnrFraToken()
+        set("Nav-Konsument", orgNr.konsument)
+        if (orgNr.databehandler != null)
+            set("Nav-Databehandler", orgNr.databehandler)
+    }
 
-class MaskinportenTokenException(message: String) : Exception(message)
+private data class OrgnummerFraMaskinportenToken(val konsument: String, val databehandler: String?)
+
+private class MaskinportenTokenException(message: String) : Exception(message)

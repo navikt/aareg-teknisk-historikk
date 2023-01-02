@@ -37,13 +37,13 @@ class AzureTokenConsumer(
     private var oidcConfiguration: OidcConfiguration? = null
     private var token: String? = null
     private var expiry: LocalDateTime? = null
-    fun getToken(scopes: List<String?>): String? {
+    fun getToken(scopes: List<String>): String? {
         updateTokenIfNeeded(scopes)
         return token
     }
 
     @Synchronized
-    private fun updateTokenIfNeeded(scopes: List<String?>) {
+    private fun updateTokenIfNeeded(scopes: List<String>) {
         if (shouldRefresh(expiry)) {
             try {
                 updateToken(scopes)
@@ -55,7 +55,7 @@ class AzureTokenConsumer(
 
     private fun shouldRefresh(expiry: LocalDateTime?) = expiry?.isBefore(now().plusMinutes(1)) ?: true
 
-    private fun updateToken(scopes: List<String?>) {
+    private fun updateToken(scopes: List<String>) {
         if (oidcConfiguration == null) {
             oidcConfiguration = restTemplate.getForObject(azureProperties.wellKnownUrl, OidcConfiguration::class.java)
         }
@@ -66,19 +66,15 @@ class AzureTokenConsumer(
         }
     }
 
-    private fun headers(): HttpHeaders {
-        val headers = HttpHeaders()
-        headers.accept = listOf(MediaType.APPLICATION_JSON)
-        headers.contentType = MediaType.APPLICATION_FORM_URLENCODED
-        headers.setBasicAuth(azureProperties.clientId, azureProperties.clientSecret)
-        return headers
+    private fun headers() = HttpHeaders().apply {
+        accept = listOf(MediaType.APPLICATION_JSON)
+        contentType = MediaType.APPLICATION_FORM_URLENCODED
+        setBasicAuth(azureProperties.clientId, azureProperties.clientSecret)
     }
 
-    private fun formParameters(scopes: List<String?>): MultiValueMap<String, String> {
-        val formParameters: MultiValueMap<String, String> = LinkedMultiValueMap()
-        formParameters.add("grant_type", "client_credentials")
-        formParameters.add("scope", scopes.joinToString(" "))
-        return formParameters
+    private fun formParameters(scopes: List<String>) = LinkedMultiValueMap<String, String>().apply {
+        add("grant_type", "client_credentials")
+        add("scope", scopes.joinToString(" "))
     }
 }
 
