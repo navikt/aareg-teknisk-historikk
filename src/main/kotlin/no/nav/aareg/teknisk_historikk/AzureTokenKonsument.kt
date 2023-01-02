@@ -2,18 +2,24 @@ package no.nav.aareg.teknisk_historikk
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.annotation.JsonProperty
+import no.nav.aareg.teknisk_historikk.models.TjenestefeilResponse
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import org.springframework.boot.context.properties.ConfigurationProperties
 import org.springframework.boot.context.properties.EnableConfigurationProperties
+import org.springframework.core.Ordered
+import org.springframework.core.annotation.Order
 import org.springframework.http.*
 import org.springframework.stereotype.Component
 import org.springframework.util.LinkedMultiValueMap
 import org.springframework.util.MultiValueMap
-import org.springframework.web.bind.annotation.ResponseStatus
+import org.springframework.web.bind.annotation.ControllerAdvice
+import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.client.RestTemplate
 import java.time.LocalDateTime
 import java.time.LocalDateTime.now
 import java.util.*
-import java.util.logging.Logger
+import javax.servlet.http.HttpServletRequest
 
 @ConfigurationProperties(prefix = "azure.app")
 data class AzureProperties(
@@ -28,8 +34,6 @@ class AzureTokenConsumer(
     private val azureProperties: AzureProperties,
     private val restTemplate: RestTemplate
 ) {
-    private val log = Logger.getLogger(this::javaClass.name)
-
     private var oidcConfiguration: OidcConfiguration? = null
     private var token: String? = null
     private var expiry: LocalDateTime? = null
@@ -44,15 +48,10 @@ class AzureTokenConsumer(
             try {
                 updateToken(scopes)
             } catch (e: RuntimeException) {
-                log.info("Feil fanget: ${e.message}")
-                if (hasExpired(expiry)) {
-                    throw TokenExpiredException("En feil oppsto ved forsøk på å refreshe AzureAD token", e)
-                }
+                throw AzureKonsumentException(Feilkode.AZURE_KONSUMENT_FEIL.toString(), e)
             }
         }
     }
-
-    private fun hasExpired(expiry: LocalDateTime?) = expiry?.isBefore(now()) ?: true
 
     private fun shouldRefresh(expiry: LocalDateTime?) = expiry?.isBefore(now().plusMinutes(1)) ?: true
 
@@ -83,6 +82,22 @@ class AzureTokenConsumer(
     }
 }
 
+@ControllerAdvice
+@Order(Ordered.HIGHEST_PRECEDENCE)
+class AzureKonsumentFeilmeldinger {
+    private val log: Logger = LoggerFactory.getLogger(AzureKonsumentFeilmeldinger::class.java)
+
+    @ExceptionHandler(AzureKonsumentException::class)
+    fun azurekonsumentFeil(exception: Throwable, httpServletRequest: HttpServletRequest): ResponseEntity<TjenestefeilResponse> {
+        log.error("Feil ved henting av Azure AD-token", exception)
+        return tjenestefeilRespons(
+            httpServletRequest,
+            HttpStatus.INTERNAL_SERVER_ERROR,
+            exception.message!!
+        )
+    }
+}
+
 @JsonIgnoreProperties(ignoreUnknown = true)
 private class AccessTokenResponse {
     @JsonProperty("expires_in")
@@ -98,5 +113,4 @@ private class OidcConfiguration {
     val tokenEndpoint: String? = null
 }
 
-@ResponseStatus(value = HttpStatus.UNAUTHORIZED)
-private class TokenExpiredException(message: String, cause: Throwable) : RuntimeException(message, cause)
+private class AzureKonsumentException(message: String, cause: Throwable) : Exception(message, cause)

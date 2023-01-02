@@ -1,7 +1,7 @@
 package no.nav.aareg.teknisk_historikk.api
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import no.nav.aareg.teknisk_historikk.aareg_services.AaregServicesConsumer
+import no.nav.aareg.teknisk_historikk.aareg_services.AaregServicesKonsument
 import no.nav.aareg.teknisk_historikk.models.FinnTekniskHistorikkForArbeidstaker200Response
 import no.nav.aareg.teknisk_historikk.models.Soekeparametere
 import no.nav.aareg.teknisk_historikk.tjenestefeilRespons
@@ -32,7 +32,7 @@ const val ARBEIDSSTED_MAA_VAERE_TALL = "arbeidssted må kun være tall"
 
 @RestController
 class ArbeidsforholdApi(
-    private val aaregServicesConsumer: AaregServicesConsumer
+    private val aaregServicesKonsument: AaregServicesKonsument
 ) : ApiApi {
 
     @Autowired
@@ -42,7 +42,7 @@ class ArbeidsforholdApi(
 
     override fun finnTekniskHistorikkForArbeidstaker(soekeparametere: Soekeparametere): ResponseEntity<FinnTekniskHistorikkForArbeidstaker200Response> {
         validerSoekeparametere(soekeparametere)
-        return ok(aaregServicesConsumer.hentArbeidsforholdForArbeidstaker(soekeparametere))
+        return ok(aaregServicesKonsument.hentArbeidsforholdForArbeidstaker(soekeparametere))
     }
 
     private fun validerSoekeparametere(soekeparametere: Soekeparametere) {

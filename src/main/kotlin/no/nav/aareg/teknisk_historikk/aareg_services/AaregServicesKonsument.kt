@@ -8,20 +8,23 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import no.nav.aareg.teknisk_historikk.*
 import no.nav.aareg.teknisk_historikk.aareg_services.contract.Arbeidsforhold
 import no.nav.aareg.teknisk_historikk.models.*
+import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.slf4j.MDC
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.context.properties.ConfigurationProperties
 import org.springframework.boot.context.properties.EnableConfigurationProperties
-import org.springframework.http.HttpEntity
-import org.springframework.http.HttpHeaders
-import org.springframework.http.HttpMethod
-import org.springframework.http.MediaType
+import org.springframework.core.Ordered
+import org.springframework.core.annotation.Order
+import org.springframework.http.*
 import org.springframework.stereotype.Component
+import org.springframework.web.bind.annotation.ControllerAdvice
+import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.client.HttpClientErrorException.Forbidden
 import org.springframework.web.client.HttpClientErrorException.Unauthorized
 import org.springframework.web.client.HttpStatusCodeException
 import org.springframework.web.client.RestTemplate
+import javax.servlet.http.HttpServletRequest
 
 @ConfigurationProperties(prefix = "app.aareg.services")
 data class AaregServicesConfig(
@@ -31,13 +34,12 @@ data class AaregServicesConfig(
 
 @Component
 @EnableConfigurationProperties(AaregServicesConfig::class)
-class AaregServicesConsumer(
+class AaregServicesKonsument(
     private val aaregServicesConfig: AaregServicesConfig,
     private val azureTokenConsumer: AzureTokenConsumer,
     private val restTemplate: RestTemplate,
     @Value("\${app.name}") private val appName: String
 ) {
-    private val log = LoggerFactory.getLogger(this.javaClass.name)
     fun hentArbeidsforholdForArbeidstaker(soekeparametere: Soekeparametere): FinnTekniskHistorikkForArbeidstaker200Response {
         try {
             val aaregServicesResponse: List<Arbeidsforhold> = restTemplate.exchange(
@@ -59,13 +61,9 @@ class AaregServicesConsumer(
                 is Unauthorized -> Feilkode.AAREG_SERVICES_UNAUTHORIZED
                 else -> Feilkode.AAREG_SERVICES_ERROR
             }
-            val feil = Feil(feilkode, e)
-            log.error(feilkode.toString(), feil)
-            throw feil
+            throw AaregServicesKonsumentException(feilkode.toString(), e)
         } catch (e: JsonMappingException) {
-            val feil = Feil(Feilkode.AAREG_SERVICES_MALFORMED, e)
-            log.error(Feilkode.AAREG_SERVICES_MALFORMED.toString(), e)
-            throw feil
+            throw AaregServicesKonsumentException(Feilkode.AAREG_SERVICES_MALFORMED.toString(), e)
         }
     }
 
@@ -98,4 +96,30 @@ class AaregServicesConsumer(
     }
 }
 
-class AaregServicesForbiddenException(e: Forbidden) : Exception(e)
+@ControllerAdvice
+@Order(Ordered.HIGHEST_PRECEDENCE)
+class AaregServicesKonsumentFeilmeldinger {
+    private val log: Logger = LoggerFactory.getLogger(AaregServicesKonsumentFeilmeldinger::class.java)
+
+    @ExceptionHandler(AaregServicesForbiddenException::class)
+    fun forbiddenHandler(forbidden: Throwable, httpServletRequest: HttpServletRequest) =
+        tjenestefeilRespons(
+            httpServletRequest,
+            HttpStatus.FORBIDDEN,
+            Feilkode.AAREG_SERVICES_FORBIDDEN.toString()
+        )
+
+    @ExceptionHandler(AaregServicesKonsumentException::class)
+    fun aaregServicesKonsumentFeil(exception: Throwable, httpServletRequest: HttpServletRequest): ResponseEntity<TjenestefeilResponse> {
+        log.error(exception.message!!, exception)
+        return tjenestefeilRespons(
+            httpServletRequest,
+            HttpStatus.INTERNAL_SERVER_ERROR,
+            exception.message!!
+        )
+    }
+}
+
+private class AaregServicesForbiddenException(e: Forbidden) : Exception(e)
+
+private class AaregServicesKonsumentException(message: String, cause: Throwable) : Exception(message, cause)

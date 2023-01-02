@@ -1,32 +1,23 @@
 package no.nav.aareg.teknisk_historikk
 
-import no.nav.aareg.teknisk_historikk.aareg_services.AaregServicesForbiddenException
 import no.nav.aareg.teknisk_historikk.models.TjenestefeilResponse
 import org.slf4j.LoggerFactory
+import org.springframework.core.Ordered
+import org.springframework.core.annotation.Order
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
-import org.springframework.http.ResponseEntity.status
 import org.springframework.web.HttpMediaTypeNotSupportedException
 import org.springframework.web.HttpRequestMethodNotSupportedException
 import org.springframework.web.bind.annotation.ControllerAdvice
 import org.springframework.web.bind.annotation.ExceptionHandler
-import org.springframework.web.client.HttpClientErrorException.Forbidden
 import javax.servlet.http.HttpServletRequest
 
 @ControllerAdvice
+@Order(Ordered.LOWEST_PRECEDENCE)
 class Feilmeldinger {
 
     private val log = LoggerFactory.getLogger(Feilmeldinger::class.java)
     private val secureLog = LoggerFactory.getLogger("secureLogger")
-
-    @ExceptionHandler(AaregServicesForbiddenException::class)
-    fun forbiddenHandler(forbidden: Forbidden, httpServletRequest: HttpServletRequest) =
-        tjenestefeilRespons(httpServletRequest, HttpStatus.FORBIDDEN, "Du mangler tilgang til å gjøre oppslag på arbeidstakeren")
-
-    @ExceptionHandler(Feil::class)
-    fun feilhandler(feil: Feil, httpServletRequest: HttpServletRequest): ResponseEntity<Feilrespons> {
-        return status(HttpStatus.INTERNAL_SERVER_ERROR).body(feil.feilrespons())
-    }
 
     @ExceptionHandler(HttpMediaTypeNotSupportedException::class)
     fun feilMediaType(exception: HttpMediaTypeNotSupportedException, httpServletRequest: HttpServletRequest) =

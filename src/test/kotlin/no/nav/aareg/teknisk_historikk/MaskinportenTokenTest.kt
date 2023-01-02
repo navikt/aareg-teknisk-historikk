@@ -6,7 +6,7 @@ import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.junit5.WireMockRuntimeInfo
 import com.github.tomakehurst.wiremock.junit5.WireMockTest
 import no.nav.aareg.teknisk_historikk.api.gyldigSoekeparameter
-import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -39,7 +39,7 @@ class MaskinportenTokenTest : AaregTekniskHistorikkTest() {
         logWatcher = ListAppender<ILoggingEvent>().apply { this.start() }
         WireMock.stubFor(
             WireMock.post("/token").willReturn(
-                WireMock.okJson("{\"access_token\":\"testtoken\", \"expires_in\": 10000}")
+                WireMock.okJson("{\"access_token\":\"testtoken\", \"expires_in\": 10}")
             )
         )
 
@@ -65,7 +65,7 @@ class MaskinportenTokenTest : AaregTekniskHistorikkTest() {
             String::class.java
         )
 
-        Assertions.assertEquals(HttpStatus.OK, result.statusCode)
+        assertEquals(HttpStatus.OK, result.statusCode)
     }
 
     @Test
@@ -84,6 +84,6 @@ class MaskinportenTokenTest : AaregTekniskHistorikkTest() {
             String::class.java
         )
 
-        Assertions.assertEquals(HttpStatus.OK, result.statusCode)
+        assertEquals(HttpStatus.OK, result.statusCode)
     }
 }
