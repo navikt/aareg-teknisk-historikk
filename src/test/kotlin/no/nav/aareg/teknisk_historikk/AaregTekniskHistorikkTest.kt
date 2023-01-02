@@ -17,10 +17,20 @@ open class AaregTekniskHistorikkTest {
     lateinit var jwtDecoder: JwtDecoder
 }
 
-fun headerMedAutentisering() = HttpHeaders().apply { set("Authorization", "Bearer $testToken") }
+fun headerMedAutentisering() = HttpHeaders().medAutentisering()
+fun HttpHeaders.medAutentisering(): HttpHeaders {
+    set("Authorization", "Bearer $testToken")
+    return this
+}
 
-const val testToken =
-    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzY29wZSI6Im5hdjphYXJlZy92MS9hcmJlaWRzZm9yaG9sZC90ZWtuaXNraGlzdG9yaWtrIiwiaXNzIjoiaHR0cHM6Ly92ZXIyLm1hc2tpbnBvcnRlbi5uby8iLCJjbGllbnRfYW1yIjoicHJpdmF0ZV9rZXlfand0IiwidG9rZW5fdHlwZSI6IkJlYXJlciIsImV4cCI6MTY3MTc4OTIwMywiaWF0IjoxNjcxNzg5MDgzLCJjbGllbnRfaWQiOiJhYmNkMTIzNCIsImp0aSI6ImFiY2QxMjM0IiwiY29uc3VtZXIiOnsiYXV0aG9yaXR5IjoiaXNvNjUyMy1hY3RvcmlkLXVwaXMiLCJJRCI6IjEyMzQ6MTIzNDU2Nzg5In19.G32zTpMUTznNWr1I55VhMjzJBFfu3FUEwOVye-az5E0"
+fun HttpHeaders.medKorrelasjonsid(): HttpHeaders {
+    set(KORRELASJONSID_HEADER, "korrelasjonsid")
+    return this
+}
+
+fun headerMedAutentiseringOgKorrelasjon() = headerMedAutentisering().medKorrelasjonsid()
+
+const val testToken = "testmaskinportentoken"
 
 const val testorg = "98765432"
 const val testsupplier = "89765432"

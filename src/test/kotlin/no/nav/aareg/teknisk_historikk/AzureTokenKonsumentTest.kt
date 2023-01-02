@@ -62,7 +62,7 @@ class AzureTokenKonsumentTest : AaregTekniskHistorikkTest() {
 
         val result = testRestTemplate.postForEntity(
             ENDEPUNKT_URI,
-            HttpEntity(gyldigSoekeparameter(), headerMedAutentisering()),
+            HttpEntity(gyldigSoekeparameter(), headerMedAutentiseringOgKorrelasjon()),
             FinnTekniskHistorikkForArbeidstaker200Response::class.java
         )
 
