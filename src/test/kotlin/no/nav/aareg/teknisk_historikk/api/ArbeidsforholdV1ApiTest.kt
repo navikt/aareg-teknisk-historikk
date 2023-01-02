@@ -21,7 +21,6 @@ import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.web.client.TestRestTemplate
 import org.springframework.http.HttpEntity
-import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
 
@@ -64,7 +63,6 @@ class ArbeidsforholdV1ApiTest : AaregTekniskHistorikkTest() {
     fun `bruker sendte inn gyldige data`(wmRuntimeInfo: WireMockRuntimeInfo) {
         stubFor(
             get(AAREG_SERVICES_URI)
-                .withHeader("Authorization", equalTo("Bearer testtoken"))
                 .withHeader("Nav-Personident", equalTo("123456789"))
                 .withHeader("Nav-Opplysningspliktigident", equalTo("123456"))
                 .withHeader("Nav-Arbeidsstedident", equalTo("12345"))
@@ -87,9 +85,7 @@ class ArbeidsforholdV1ApiTest : AaregTekniskHistorikkTest() {
     fun `mangelfull respons fra aareg services`(wmRuntimeInfo: WireMockRuntimeInfo) {
         (LoggerFactory.getLogger(AaregServicesConsumer::class.java) as Logger).addAppender(logWatcher)
         stubFor(
-            get(AAREG_SERVICES_URI)
-                .withHeader("Authorization", equalTo("Bearer testtoken"))
-                .willReturn(okJson("{}"))
+            get(AAREG_SERVICES_URI).willReturn(okJson("{}"))
         )
 
         val result = testRestTemplate.postForEntity(
@@ -106,9 +102,7 @@ class ArbeidsforholdV1ApiTest : AaregTekniskHistorikkTest() {
     @Test
     fun `500-feil fra aareg-services kastes ikke videre`(wmRuntimeInfo: WireMockRuntimeInfo) {
         stubFor(
-            get(AAREG_SERVICES_URI)
-                .withHeader("Authorization", equalTo("Bearer testtoken"))
-                .willReturn(serverError().withBody("Jeg er ikke synlig for brukeren"))
+            get(AAREG_SERVICES_URI).willReturn(serverError().withBody("Jeg er ikke synlig for brukeren"))
         )
 
         val result = testRestTemplate.postForEntity(
@@ -125,9 +119,7 @@ class ArbeidsforholdV1ApiTest : AaregTekniskHistorikkTest() {
     fun `500-feil fra aareg-services logges`(wmRuntimeInfo: WireMockRuntimeInfo) {
         (LoggerFactory.getLogger(AaregServicesConsumer::class.java) as Logger).addAppender(logWatcher)
         stubFor(
-            get(AAREG_SERVICES_URI)
-                .withHeader("Authorization", equalTo("Bearer testtoken"))
-                .willReturn(serverError().withBody("Jeg er ikke synlig for brukeren"))
+            get(AAREG_SERVICES_URI).willReturn(serverError().withBody("Jeg er ikke synlig for brukeren"))
         )
 
         val result = testRestTemplate.postForEntity(
@@ -146,7 +138,7 @@ class ArbeidsforholdV1ApiTest : AaregTekniskHistorikkTest() {
         val result = testRestTemplate.exchange(
             ENDEPUNKT_URI,
             HttpMethod.GET,
-            HttpEntity<Void>(headerMedKorrelasjonsId()),
+            HttpEntity<Void>(headerMedAutentiseringOgKorrelasjon()),
             TjenestefeilResponse::class.java
         )
 
@@ -161,7 +153,7 @@ class ArbeidsforholdV1ApiTest : AaregTekniskHistorikkTest() {
     fun `bruker sendte ikke inn json`(wmRuntimeInfo: WireMockRuntimeInfo) {
         val result = testRestTemplate.postForEntity(
             ENDEPUNKT_URI,
-            HttpEntity("", headerMedKorrelasjonsId()),
+            HttpEntity("", headerMedAutentiseringOgKorrelasjon()),
             TjenestefeilResponse::class.java
         )
 
@@ -176,7 +168,7 @@ class ArbeidsforholdV1ApiTest : AaregTekniskHistorikkTest() {
     fun `bruker sendte ikke inn json-objekt`(wmRuntimeInfo: WireMockRuntimeInfo) {
         val result = testRestTemplate.postForEntity(
             ENDEPUNKT_URI,
-            HttpEntity(emptyList<String>(), headerMedKorrelasjonsId()),
+            HttpEntity(emptyList<String>(), headerMedAutentiseringOgKorrelasjon()),
             TjenestefeilResponse::class.java
         )
 
@@ -187,7 +179,7 @@ class ArbeidsforholdV1ApiTest : AaregTekniskHistorikkTest() {
     fun `bruker sendte ikke inn arbeidstaker`(wmRuntimeInfo: WireMockRuntimeInfo) {
         val result = testRestTemplate.postForEntity(
             ENDEPUNKT_URI,
-            HttpEntity(Soekeparametere(), headerMedKorrelasjonsId()),
+            HttpEntity(Soekeparametere(), headerMedAutentiseringOgKorrelasjon()),
             TjenestefeilResponse::class.java
         )
 
@@ -206,7 +198,7 @@ class ArbeidsforholdV1ApiTest : AaregTekniskHistorikkTest() {
                 arbeidstaker = "abcd1234"
                 opplysningspliktig = "abcd1234"
                 arbeidssted = "abcd1234"
-            }, headerMedKorrelasjonsId()),
+            }, headerMedAutentiseringOgKorrelasjon()),
             TjenestefeilResponse::class.java
         )
 
@@ -223,9 +215,7 @@ class ArbeidsforholdV1ApiTest : AaregTekniskHistorikkTest() {
     fun `401-feil fra aareg-services logges`(wmRuntimeInfo: WireMockRuntimeInfo) {
         (LoggerFactory.getLogger(AaregServicesConsumer::class.java) as Logger).addAppender(logWatcher)
         stubFor(
-            get(AAREG_SERVICES_URI)
-                .withHeader("Authorization", equalTo("Bearer testtoken"))
-                .willReturn(unauthorized().withBody("Jeg er ikke synlig for brukeren"))
+            get(AAREG_SERVICES_URI).willReturn(unauthorized().withBody("Jeg er ikke synlig for brukeren"))
         )
 
         val result = testRestTemplate.postForEntity(
@@ -243,14 +233,12 @@ class ArbeidsforholdV1ApiTest : AaregTekniskHistorikkTest() {
     fun `403-feil fra aareg-services gir fornuftig feilmelding`(wmRuntimeInfo: WireMockRuntimeInfo) {
         (LoggerFactory.getLogger(AaregServicesConsumer::class.java) as Logger).addAppender(logWatcher)
         stubFor(
-            get(AAREG_SERVICES_URI)
-                .withHeader("Authorization", equalTo("Bearer testtoken"))
-                .willReturn(forbidden().withBody("Jeg er ikke synlig for brukeren"))
+            get(AAREG_SERVICES_URI).willReturn(forbidden().withBody("Jeg er ikke synlig for brukeren"))
         )
 
         val result = testRestTemplate.postForEntity(
             ENDEPUNKT_URI,
-            HttpEntity(gyldigSoekeparameter(), headerMedKorrelasjonsId()),
+            HttpEntity(gyldigSoekeparameter(), headerMedAutentiseringOgKorrelasjon()),
             TjenestefeilResponse::class.java
         )
 
@@ -259,11 +247,6 @@ class ArbeidsforholdV1ApiTest : AaregTekniskHistorikkTest() {
             result.body
         )
     }
-}
-
-fun headerMedKorrelasjonsId() = HttpHeaders().apply {
-    set(KORRELASJONSID_HEADER, "korrelasjonsid")
-    set("Authorization", "Bearer $testToken")
 }
 
 fun gyldigSoekeparameter() = Soekeparametere().apply {
