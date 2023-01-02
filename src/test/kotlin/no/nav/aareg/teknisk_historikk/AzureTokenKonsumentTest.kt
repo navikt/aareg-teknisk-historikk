@@ -51,12 +51,12 @@ class AzureTokenKonsumentTest : AaregTekniskHistorikkTest() {
     fun `vellykket henting av ad-token`(wmRuntimeInfo: WireMockRuntimeInfo) {
         stubFor(
             post("/token").willReturn(
-                okJson("{\"access_token\":\"testtoken\", \"expires_in\": 10000}")
+                okJson("{\"access_token\":\"$testAzureToken\", \"expires_in\": 10000}")
             )
         )
         stubFor(
             get(AAREG_SERVICES_URI)
-                .withHeader("Authorization", equalTo("Bearer testtoken"))
+                .withHeader("Authorization", equalTo("Bearer $testAzureToken"))
                 .willReturn(okJson("[]"))
         )
 
@@ -69,3 +69,5 @@ class AzureTokenKonsumentTest : AaregTekniskHistorikkTest() {
         assertEquals(HttpStatus.OK, result.statusCode)
     }
 }
+
+const val testAzureToken = "testazuretoken"
