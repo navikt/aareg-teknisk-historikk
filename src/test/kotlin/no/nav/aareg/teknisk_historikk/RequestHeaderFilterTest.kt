@@ -7,7 +7,7 @@ import com.github.tomakehurst.wiremock.junit5.WireMockRuntimeInfo
 import com.github.tomakehurst.wiremock.junit5.WireMockTest
 import no.nav.aareg.teknisk_historikk.api.gyldigSoekeparameter
 import no.nav.aareg.teknisk_historikk.models.FinnTekniskHistorikkForArbeidstaker200Response
-import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -41,7 +41,7 @@ class RequestHeaderFilterTest : AaregTekniskHistorikkTest() {
         Mockito.`when`(jwtDecoder.decode(testToken)).thenReturn(testJwt)
         WireMock.stubFor(
             WireMock.post("/token").willReturn(
-                WireMock.okJson("{\"access_token\":\"$testAzureToken\", \"expires_in\": 10000}")
+                WireMock.okJson("{\"access_token\":\"$testAzureToken\", \"expires_in\": 10}")
             )
         )
 
@@ -66,8 +66,8 @@ class RequestHeaderFilterTest : AaregTekniskHistorikkTest() {
             FinnTekniskHistorikkForArbeidstaker200Response::class.java
         )
 
-        Assertions.assertEquals(HttpStatus.OK, result.statusCode)
-        Assertions.assertEquals(0, result.body?.antallArbeidsforhold)
+        assertEquals(HttpStatus.OK, result.statusCode)
+        assertEquals(0, result.body?.antallArbeidsforhold)
     }
 
     @Test
@@ -84,7 +84,7 @@ class RequestHeaderFilterTest : AaregTekniskHistorikkTest() {
             FinnTekniskHistorikkForArbeidstaker200Response::class.java
         )
 
-        Assertions.assertEquals(HttpStatus.OK, result.statusCode)
-        Assertions.assertEquals(0, result.body?.antallArbeidsforhold)
+        assertEquals(HttpStatus.OK, result.statusCode)
+        assertEquals(0, result.body?.antallArbeidsforhold)
     }
 }
