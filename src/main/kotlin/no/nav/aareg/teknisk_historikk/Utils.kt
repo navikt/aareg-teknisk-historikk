@@ -1,6 +1,8 @@
 package no.nav.aareg.teknisk_historikk
 
 import no.nav.aareg.teknisk_historikk.models.TjenestefeilResponse
+import org.slf4j.MDC
+import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity.status
 import javax.servlet.http.HttpServletRequest
@@ -13,3 +15,8 @@ fun tjenestefeilRespons(httpServletRequest: HttpServletRequest, httpStatus: Http
         korrelasjonsid = httpServletRequest.getAttribute(KORRELASJONSID_HEADER) as String
         meldinger = feilmeldinger
     })
+
+fun HttpHeaders.medKorrelasjonsid() =
+    HttpHeaders(this).apply {
+        set(KORRELASJONSID_HEADER, MDC.get(KORRELASJONSID_HEADER))
+    }
