@@ -263,7 +263,7 @@ fun tjenestefeilMedMelding(vararg melding: String) = TjenestefeilResponse().appl
     meldinger = melding.asList()
 }
 
-private val arbeidsforhold1 = """
+val arbeidsforhold1 = """
         [
           {
             "id": "abc-321",

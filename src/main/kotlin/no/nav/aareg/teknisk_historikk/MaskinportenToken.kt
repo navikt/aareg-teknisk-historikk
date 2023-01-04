@@ -6,7 +6,7 @@ import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.security.oauth2.jwt.Jwt
 import java.text.ParseException
 
-private fun hentOrgnrFraToken(): OrgnummerFraMaskinportenToken {
+fun hentOrgnrFraToken(): OrgnummerFraMaskinportenToken {
     val principal = SecurityContextHolder.getContext().authentication.principal
     val claims = if (principal is Jwt) principal.claims else HashMap()
     var konsument = ""
@@ -38,6 +38,6 @@ fun HttpHeaders.medKonsumentOgDatabehandler() =
             set("Nav-Databehandler", orgNr.databehandler)
     }
 
-private data class OrgnummerFraMaskinportenToken(val konsument: String, val databehandler: String?)
+data class OrgnummerFraMaskinportenToken(val konsument: String, val databehandler: String?)
 
 private class MaskinportenTokenException(message: String) : Exception(message)

@@ -1,8 +1,10 @@
 package no.nav.aareg.teknisk_historikk.api
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import io.micrometer.core.instrument.MeterRegistry
 import no.nav.aareg.teknisk_historikk.aareg_services.AaregServicesKonsument
 import no.nav.aareg.teknisk_historikk.aareg_services.mapArbeidsforhold
+import no.nav.aareg.teknisk_historikk.loggOppslag
 import no.nav.aareg.teknisk_historikk.models.FinnTekniskHistorikkForArbeidstaker200Response
 import no.nav.aareg.teknisk_historikk.models.Soekeparametere
 import no.nav.aareg.teknisk_historikk.tjenestefeilRespons
@@ -30,9 +32,10 @@ const val ARBEIDSTAKER_ER_PAAKREVD = "arbeidstaker er et påkrevd felt"
 const val ARBEIDSTAKER_MAA_VAERE_TALL = "arbeidstaker må kun være tall"
 const val OPPLYSNINGSPLIKTIG_MAA_VAERE_TALL = "opplysningspliktig må kun være tall"
 const val ARBEIDSSTED_MAA_VAERE_TALL = "arbeidssted må kun være tall"
+const val FINN_TEKNISK_HISTORIKK_NAVN = "TekniskHistorikkForArbeidstaker"
 
 @RestController
-class ArbeidsforholdApi(private val aaregServicesKonsument: AaregServicesKonsument) : ApiApi {
+class ArbeidsforholdApi(private val aaregServicesKonsument: AaregServicesKonsument, private val meterRegistry: MeterRegistry) : ApiApi {
 
     @Autowired
     private lateinit var httpservletRequest: HttpServletRequest
@@ -42,6 +45,9 @@ class ArbeidsforholdApi(private val aaregServicesKonsument: AaregServicesKonsume
     override fun finnTekniskHistorikkForArbeidstaker(soekeparametere: Soekeparametere): ResponseEntity<FinnTekniskHistorikkForArbeidstaker200Response> {
         validerSoekeparametere(soekeparametere)
         val arbeidsforholdliste = aaregServicesKonsument.hentArbeidsforholdForArbeidstaker(soekeparametere)
+
+        meterRegistry.loggOppslag(httpservletRequest, FINN_TEKNISK_HISTORIKK_NAVN, arbeidsforholdliste.size)
+
         return ok(FinnTekniskHistorikkForArbeidstaker200Response().apply {
             antallArbeidsforhold = arbeidsforholdliste.size
             arbeidsforhold = arbeidsforholdliste.map(mapArbeidsforhold)
