@@ -10,7 +10,7 @@ spec:
     - name: APP_NAME
       value: aareg-teknisk-historikk
     - name: APP_AAREG_SERVICES_URL
-      value: {{aaregservices_url}}
+      value: https://{{aaregservices_host}}
     - name: APP_AAREG_SERVICES_SCOPE
       value: {{aaregservices_scope}}
     - name: SPRING_PROFILES_ACTIVE
@@ -18,7 +18,7 @@ spec:
   image: {{image}}
   port: 8080
   ingresses:
-    - https://aareg-teknisk-historikk.ekstern.dev.nav.no
+    - {{ingress}}
   replicas:
     min: 2
     max: 2
@@ -56,6 +56,6 @@ spec:
   accessPolicy:
     outbound:
       external:
-        - host: aareg-services.dev-fss-pub.nais.io
+        - host: {{aaregservices_host}}
   secureLogs:
     enabled: true
