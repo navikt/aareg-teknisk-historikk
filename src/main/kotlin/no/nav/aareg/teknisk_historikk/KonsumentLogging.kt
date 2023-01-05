@@ -20,13 +20,15 @@ const val DATABEHANDLER_METRIC_TAG_NAVN = "databehandler"
 class KonsumentFilter : OncePerRequestFilter() {
     override fun doFilterInternal(req: HttpServletRequest, response: HttpServletResponse, filterChain: FilterChain) {
         try {
-            val orgNummer = hentOrgnrFraToken()
+            if (req.requestURI.startsWith("/api/")) {
+                val orgNummer = hentOrgnrFraToken()
 
-            MDC.put(MDC_CONSUMER_ID, orgNummer.konsument)
-            if (orgNummer.databehandler != null) MDC.put(MDC_SUPPLIER_ID, orgNummer.databehandler)
+                MDC.put(MDC_CONSUMER_ID, orgNummer.konsument)
+                if (orgNummer.databehandler != null) MDC.put(MDC_SUPPLIER_ID, orgNummer.databehandler)
 
-            req.setAttribute(MDC_CONSUMER_ID, orgNummer.konsument)
-            req.setAttribute(MDC_SUPPLIER_ID, orgNummer.databehandler)
+                req.setAttribute(MDC_CONSUMER_ID, orgNummer.konsument)
+                req.setAttribute(MDC_SUPPLIER_ID, orgNummer.databehandler)
+            }
 
             filterChain.doFilter(req, response)
         } finally {
