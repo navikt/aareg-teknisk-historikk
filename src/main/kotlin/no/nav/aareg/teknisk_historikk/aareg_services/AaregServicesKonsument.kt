@@ -10,6 +10,7 @@ import no.nav.aareg.teknisk_historikk.aareg_services.contract.Arbeidsforhold
 import no.nav.aareg.teknisk_historikk.models.*
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import org.slf4j.MDC
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.context.properties.ConfigurationProperties
 import org.springframework.boot.context.properties.EnableConfigurationProperties
@@ -74,6 +75,11 @@ class AaregServicesKonsument(
                 .medSoekeparametere(soekeparametere)
                 .medKorrelasjonsid()
         )
+    }
+
+    private fun HttpHeaders.medKorrelasjonsid(): HttpHeaders {
+        set(KORRELASJONSID_HEADER, MDC.get(KORRELASJONSID_HEADER))
+        return this
     }
 }
 
