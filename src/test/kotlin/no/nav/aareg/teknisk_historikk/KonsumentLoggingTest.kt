@@ -64,6 +64,12 @@ class KonsumentLoggingTest : AaregTekniskHistorikkTest() {
                 .willReturn(WireMock.okJson(arbeidsforhold1))
         )
 
+        // TODO nullstill teller før test kjøres
+        val forrigeTeller = meterRegistry.counter(AAREG_ARBEIDSFORHOLD_OPPSLAG_NAVN,
+            OPPSLAGSTYPE_METRIC_TAG_NAVN, FINN_TEKNISK_HISTORIKK_NAVN,
+            ORG_NUMMER_METRIC_TAG_NAVN, testorg,
+            DATABEHANDLER_METRIC_TAG_NAVN, "").count()
+
         testRestTemplate.postForEntity(
             ENDEPUNKT_URI,
             HttpEntity(gyldigSoekeparameter(), headerMedAutentisering()),
@@ -73,7 +79,7 @@ class KonsumentLoggingTest : AaregTekniskHistorikkTest() {
         assertEquals(1.0, meterRegistry.counter(AAREG_ARBEIDSFORHOLD_OPPSLAG_NAVN,
             OPPSLAGSTYPE_METRIC_TAG_NAVN, FINN_TEKNISK_HISTORIKK_NAVN,
             ORG_NUMMER_METRIC_TAG_NAVN, testorg,
-            DATABEHANDLER_METRIC_TAG_NAVN, "").count())
+            DATABEHANDLER_METRIC_TAG_NAVN, "").count() - forrigeTeller)
     }
 
     @Test
@@ -84,6 +90,12 @@ class KonsumentLoggingTest : AaregTekniskHistorikkTest() {
                 .willReturn(WireMock.okJson(arbeidsforhold1))
         )
 
+        // TODO nullstill teller før test kjøres
+        val forrigeTeller = meterRegistry.counter(AAREG_ARBEIDSFORHOLD_OPPSLAG_NAVN,
+            OPPSLAGSTYPE_METRIC_TAG_NAVN, FINN_TEKNISK_HISTORIKK_NAVN,
+            ORG_NUMMER_METRIC_TAG_NAVN, testorg,
+            DATABEHANDLER_METRIC_TAG_NAVN, testsupplier).count()
+
         testRestTemplate.postForEntity(
             ENDEPUNKT_URI,
             HttpEntity(gyldigSoekeparameter(), headerMedAutentisering()),
@@ -93,6 +105,6 @@ class KonsumentLoggingTest : AaregTekniskHistorikkTest() {
         assertEquals(1.0, meterRegistry.counter(AAREG_ARBEIDSFORHOLD_OPPSLAG_NAVN,
             OPPSLAGSTYPE_METRIC_TAG_NAVN, FINN_TEKNISK_HISTORIKK_NAVN,
             ORG_NUMMER_METRIC_TAG_NAVN, testorg,
-            DATABEHANDLER_METRIC_TAG_NAVN, testsupplier).count())
+            DATABEHANDLER_METRIC_TAG_NAVN, testsupplier).count() - forrigeTeller)
     }
 }
