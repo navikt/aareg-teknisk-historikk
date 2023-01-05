@@ -53,7 +53,7 @@ class RequestHeaderFilterTest : AaregTekniskHistorikkTest() {
     }
 
     @Test
-    fun `aareg-services mottar korrelasjons-id`(wmRuntimeInfo: WireMockRuntimeInfo) {
+    fun `aareg-services mottar call-id`(wmRuntimeInfo: WireMockRuntimeInfo) {
         WireMock.stubFor(
             WireMock.get(AAREG_SERVICES_URI)
                 .withHeader("Nav-Call-Id", WireMock.equalTo("aareg-teknisk-historikk-test"))
@@ -71,7 +71,7 @@ class RequestHeaderFilterTest : AaregTekniskHistorikkTest() {
     }
 
     @Test
-    fun `aareg-services mottar call-id`(wmRuntimeInfo: WireMockRuntimeInfo) {
+    fun `aareg-services mottar korrelasjonsid`(wmRuntimeInfo: WireMockRuntimeInfo) {
         WireMock.stubFor(
             WireMock.get(AAREG_SERVICES_URI)
                 .withHeader(KORRELASJONSID_HEADER, WireMock.equalTo("test-korrelasjons-id"))
