@@ -11,7 +11,6 @@ import no.nav.aareg.teknisk_historikk.models.*
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.slf4j.MDC
-import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.context.properties.ConfigurationProperties
 import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.core.Ordered
@@ -37,8 +36,7 @@ data class AaregServicesConfig(
 class AaregServicesKonsument(
     private val aaregServicesConfig: AaregServicesConfig,
     private val azureTokenConsumer: AzureTokenConsumer,
-    private val restTemplate: RestTemplate,
-    @Value("\${app.name}") private val appName: String
+    private val restTemplate: RestTemplate
 ) {
     fun hentArbeidsforholdForArbeidstaker(soekeparametere: Soekeparametere): List<Arbeidsforhold> {
         try {
@@ -69,7 +67,6 @@ class AaregServicesKonsument(
                     azureTokenConsumer.getToken(listOf(aaregServicesConfig.scope))
                 )
                 contentType = MediaType.APPLICATION_JSON
-                set("Nav-Call-Id", appName)
             }
                 .medKonsumentOgDatabehandler()
                 .medSoekeparametere(soekeparametere)
