@@ -77,8 +77,8 @@ fun mapEndringskilde(kilde: String): Endringskilde {
         "KONVERTERING" -> Endringskilde.FOER_A_ORDNINGEN
         "AAREG" -> Endringskilde.SAKSBEHANDLER
         "GJENOPPBYGG_IM" -> Endringskilde.GJENOPPBYGGING
-        "AVSLUTT_AF", "AVSLUTNING" -> Endringskilde.MASKINELT_AVSLUTTET
-        "DB_SKRIPT", "OPPRYDNING", "STRT_SLUTT_ANSPER", "TILPASSET" -> Endringskilde.PATCH
+        "AVSLUTT_AF", "AVSLUTNING", "AVSLUTT_PERMISJON" -> Endringskilde.MASKINELT_AVSLUTTET
+        "DB_SKRIPT", "OPPRYDNING", "STRT_SLUTT_ANSPER", "TILPASSET", "PDL" -> Endringskilde.PATCH //TODO Se om PDL skal settes med annen verdi
         else -> throw IllegalArgumentException("Ukjent kilde")
     }
 }
