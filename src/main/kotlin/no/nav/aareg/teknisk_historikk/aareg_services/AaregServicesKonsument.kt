@@ -19,8 +19,7 @@ import org.springframework.http.*
 import org.springframework.stereotype.Component
 import org.springframework.web.bind.annotation.ControllerAdvice
 import org.springframework.web.bind.annotation.ExceptionHandler
-import org.springframework.web.client.HttpClientErrorException.Forbidden
-import org.springframework.web.client.HttpClientErrorException.Unauthorized
+import org.springframework.web.client.HttpClientErrorException.*
 import org.springframework.web.client.HttpStatusCodeException
 import org.springframework.web.client.RestTemplate
 import javax.servlet.http.HttpServletRequest
@@ -47,6 +46,8 @@ class AaregServicesKonsument(
             ).body.let {
                 reader.readValue(it)
             }
+        } catch (notfound: NotFound) {
+            throw notfound
         } catch (e: Forbidden) {
             throw AaregServicesForbiddenException(e)
         } catch (e: HttpStatusCodeException) {
@@ -85,8 +86,16 @@ class AaregServicesKonsument(
 class AaregServicesKonsumentFeilmeldinger {
     private val log: Logger = LoggerFactory.getLogger(AaregServicesKonsumentFeilmeldinger::class.java)
 
+    @ExceptionHandler(NotFound::class)
+    fun ikkeFunnetFeil(ikkeFunnet: NotFound, httpServletRequest: HttpServletRequest) =
+        tjenestefeilRespons(
+            httpServletRequest,
+            HttpStatus.NOT_FOUND,
+            ikkeFunnet.responseBodyAsString
+        )
+
     @ExceptionHandler(AaregServicesForbiddenException::class)
-    fun forbiddenHandler(forbidden: Throwable, httpServletRequest: HttpServletRequest) =
+    fun forbudtFeil(forbudt: Throwable, httpServletRequest: HttpServletRequest) =
         tjenestefeilRespons(
             httpServletRequest,
             HttpStatus.FORBIDDEN,
