@@ -252,6 +252,48 @@ class ArbeidsforholdV1ApiTest : AaregTekniskHistorikkTest() {
             result.body
         )
     }
+
+    @Test
+    fun `404-feil fra aareg-services kastes videre`(wmRuntimeInfo: WireMockRuntimeInfo) {
+        (LoggerFactory.getLogger(AaregServicesKonsumentFeilmeldinger::class.java) as Logger).addAppender(logWatcher)
+        stubFor(
+            get(AAREG_SERVICES_URI).willReturn(notFound().withBody("Ukjent ident"))
+        )
+
+        val result = testRestTemplate.postForEntity(
+            ENDEPUNKT_URI,
+            HttpEntity(gyldigSoekeparameter(), headerMedAutentiseringOgKorrelasjon()),
+            TjenestefeilResponse::class.java
+        )
+
+        assertEquals(HttpStatus.NOT_FOUND, result.statusCode)
+        assertEquals(
+            tjenestefeilMedMelding("Ukjent ident"),
+            result.body
+        )
+    }
+
+    @Test
+    fun `men 404-feil fra azure kastes ikke`(wmRuntimeInfo: WireMockRuntimeInfo) {
+        (LoggerFactory.getLogger(AaregServicesKonsumentFeilmeldinger::class.java) as Logger).addAppender(logWatcher)
+        stubFor(
+            post("/token").willReturn(
+                notFound()
+            )
+        )
+
+        val result = testRestTemplate.postForEntity(
+            ENDEPUNKT_URI,
+            HttpEntity(gyldigSoekeparameter(), headerMedAutentiseringOgKorrelasjon()),
+            TjenestefeilResponse::class.java
+        )
+
+        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, result.statusCode)
+        assertEquals(
+            tjenestefeilMedMelding(Feilkode.AZURE_KONSUMENT_FEIL.toString()),
+            result.body
+        )
+    }
 }
 
 fun gyldigSoekeparameter() = Soekeparametere().apply {
