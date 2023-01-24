@@ -61,7 +61,7 @@ class ArbeidsforholdV1ApiTest : AaregTekniskHistorikkTest() {
     }
 
     @Test
-    fun `bruker sendte inn gyldige data`(wmRuntimeInfo: WireMockRuntimeInfo) {
+    fun `bruker sendte inn gyldige data`() {
         stubFor(
             get(AAREG_SERVICES_URI)
                 .withHeader("Nav-Personident", equalTo("123456789"))
@@ -83,7 +83,7 @@ class ArbeidsforholdV1ApiTest : AaregTekniskHistorikkTest() {
     }
 
     @Test
-    fun `mangelfull respons fra aareg services`(wmRuntimeInfo: WireMockRuntimeInfo) {
+    fun `mangelfull respons fra aareg services`() {
         (LoggerFactory.getLogger(AaregServicesKonsument::class.java) as Logger).addAppender(logWatcher)
         (LoggerFactory.getLogger(AaregServicesKonsumentFeilmeldinger::class.java) as Logger).addAppender(logWatcher)
         stubFor(
@@ -102,7 +102,7 @@ class ArbeidsforholdV1ApiTest : AaregTekniskHistorikkTest() {
     }
 
     @Test
-    fun `500-feil fra aareg-services kastes ikke videre`(wmRuntimeInfo: WireMockRuntimeInfo) {
+    fun `500-feil fra aareg-services kastes ikke videre`() {
         stubFor(
             get(AAREG_SERVICES_URI).willReturn(serverError().withBody("Jeg er ikke synlig for brukeren"))
         )
@@ -118,7 +118,7 @@ class ArbeidsforholdV1ApiTest : AaregTekniskHistorikkTest() {
     }
 
     @Test
-    fun `500-feil fra aareg-services logges`(wmRuntimeInfo: WireMockRuntimeInfo) {
+    fun `500-feil fra aareg-services logges`() {
         (LoggerFactory.getLogger(AaregServicesKonsumentFeilmeldinger::class.java) as Logger).addAppender(logWatcher)
         stubFor(
             get(AAREG_SERVICES_URI).willReturn(serverError().withBody("Jeg er ikke synlig for brukeren"))
@@ -136,7 +136,7 @@ class ArbeidsforholdV1ApiTest : AaregTekniskHistorikkTest() {
     }
 
     @Test
-    fun `get i stedet for post`(wmRuntimeInfo: WireMockRuntimeInfo) {
+    fun `get i stedet for post`() {
         val result = testRestTemplate.exchange(
             ENDEPUNKT_URI,
             HttpMethod.GET,
@@ -152,7 +152,7 @@ class ArbeidsforholdV1ApiTest : AaregTekniskHistorikkTest() {
     }
 
     @Test
-    fun `bruker sendte ikke inn json`(wmRuntimeInfo: WireMockRuntimeInfo) {
+    fun `bruker sendte ikke inn json`() {
         val result = testRestTemplate.postForEntity(
             ENDEPUNKT_URI,
             HttpEntity("", headerMedAutentiseringOgKorrelasjon()),
@@ -170,7 +170,7 @@ class ArbeidsforholdV1ApiTest : AaregTekniskHistorikkTest() {
     }
 
     @Test
-    fun `bruker sendte ikke inn json-objekt`(wmRuntimeInfo: WireMockRuntimeInfo) {
+    fun `bruker sendte ikke inn json-objekt`() {
         val result = testRestTemplate.postForEntity(
             ENDEPUNKT_URI,
             HttpEntity(emptyList<String>(), headerMedAutentiseringOgKorrelasjon()),
@@ -181,7 +181,7 @@ class ArbeidsforholdV1ApiTest : AaregTekniskHistorikkTest() {
     }
 
     @Test
-    fun `bruker sendte ikke inn arbeidstaker`(wmRuntimeInfo: WireMockRuntimeInfo) {
+    fun `bruker sendte ikke inn arbeidstaker`() {
         val result = testRestTemplate.postForEntity(
             ENDEPUNKT_URI,
             HttpEntity(Soekeparametere(), headerMedAutentiseringOgKorrelasjon()),
@@ -196,7 +196,7 @@ class ArbeidsforholdV1ApiTest : AaregTekniskHistorikkTest() {
     }
 
     @Test
-    fun `bruker sendte ikke inn kun tall for verdiene`(wmRuntimeInfo: WireMockRuntimeInfo) {
+    fun `bruker sendte ikke inn kun tall for verdiene`() {
         val result = testRestTemplate.postForEntity(
             ENDEPUNKT_URI,
             HttpEntity(Soekeparametere().apply {
@@ -217,7 +217,7 @@ class ArbeidsforholdV1ApiTest : AaregTekniskHistorikkTest() {
     }
 
     @Test
-    fun `401-feil fra aareg-services logges`(wmRuntimeInfo: WireMockRuntimeInfo) {
+    fun `401-feil fra aareg-services logges`() {
         (LoggerFactory.getLogger(AaregServicesKonsumentFeilmeldinger::class.java) as Logger).addAppender(logWatcher)
         stubFor(
             get(AAREG_SERVICES_URI).willReturn(unauthorized().withBody("Jeg er ikke synlig for brukeren"))
@@ -235,7 +235,7 @@ class ArbeidsforholdV1ApiTest : AaregTekniskHistorikkTest() {
     }
 
     @Test
-    fun `403-feil fra aareg-services gir fornuftig feilmelding`(wmRuntimeInfo: WireMockRuntimeInfo) {
+    fun `403-feil fra aareg-services gir fornuftig feilmelding`() {
         (LoggerFactory.getLogger(AaregServicesKonsumentFeilmeldinger::class.java) as Logger).addAppender(logWatcher)
         stubFor(
             get(AAREG_SERVICES_URI).willReturn(forbidden().withBody("Jeg er ikke synlig for brukeren"))
@@ -254,7 +254,7 @@ class ArbeidsforholdV1ApiTest : AaregTekniskHistorikkTest() {
     }
 
     @Test
-    fun `404-feil fra aareg-services kastes videre`(wmRuntimeInfo: WireMockRuntimeInfo) {
+    fun `404-feil fra aareg-services kastes videre`() {
         (LoggerFactory.getLogger(AaregServicesKonsumentFeilmeldinger::class.java) as Logger).addAppender(logWatcher)
         stubFor(
             get(AAREG_SERVICES_URI).willReturn(notFound().withBody("Ukjent ident"))
@@ -274,7 +274,7 @@ class ArbeidsforholdV1ApiTest : AaregTekniskHistorikkTest() {
     }
 
     @Test
-    fun `men 404-feil fra azure kastes ikke`(wmRuntimeInfo: WireMockRuntimeInfo) {
+    fun `men 404-feil fra azure kastes ikke`() {
         (LoggerFactory.getLogger(AaregServicesKonsumentFeilmeldinger::class.java) as Logger).addAppender(logWatcher)
         stubFor(
             post("/token").willReturn(

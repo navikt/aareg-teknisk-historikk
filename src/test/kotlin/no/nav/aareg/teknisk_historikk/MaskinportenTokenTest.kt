@@ -51,7 +51,7 @@ class MaskinportenTokenTest : AaregTekniskHistorikkTest() {
     }
 
     @Test
-    fun `kan lese konsument fra jwt-token`(wmRuntimeInfo: WireMockRuntimeInfo) {
+    fun `kan lese konsument fra jwt-token`() {
         Mockito.`when`(jwtDecoder.decode(testToken)).thenReturn(testJwt)
         WireMock.stubFor(
             WireMock.get(AAREG_SERVICES_URI)
@@ -69,7 +69,7 @@ class MaskinportenTokenTest : AaregTekniskHistorikkTest() {
     }
 
     @Test
-    fun `kan lese databehandler fra jwt-tokenet`(wmRuntimeInfo: WireMockRuntimeInfo) {
+    fun `kan lese databehandler fra jwt-tokenet`() {
         Mockito.`when`(jwtDecoder.decode(testToken)).thenReturn(testJwtMedDatabehandler)
         WireMock.stubFor(
             WireMock.get(AAREG_SERVICES_URI)
