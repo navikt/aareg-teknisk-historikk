@@ -57,7 +57,7 @@ class KonsumentLoggingTest : AaregTekniskHistorikkTest() {
     }
 
     @Test
-    fun `logger oppslagsmetrikker for konsumenter`(wmRuntimeInfo: WireMockRuntimeInfo) {
+    fun `logger oppslagsmetrikker for konsumenter`() {
         Mockito.`when`(jwtDecoder.decode(testToken)).thenReturn(testJwt)
         WireMock.stubFor(
             WireMock.get(AAREG_SERVICES_URI)
@@ -83,7 +83,7 @@ class KonsumentLoggingTest : AaregTekniskHistorikkTest() {
     }
 
     @Test
-    fun `logger oppslagsmetrikker for databehandlere`(wmRuntimeInfo: WireMockRuntimeInfo) {
+    fun `logger oppslagsmetrikker for databehandlere`() {
         Mockito.`when`(jwtDecoder.decode(testToken)).thenReturn(testJwtMedDatabehandler)
         WireMock.stubFor(
             WireMock.get(AAREG_SERVICES_URI)

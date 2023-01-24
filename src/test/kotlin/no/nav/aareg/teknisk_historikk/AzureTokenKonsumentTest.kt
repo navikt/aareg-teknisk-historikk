@@ -57,7 +57,7 @@ class AzureTokenKonsumentTest : AaregTekniskHistorikkTest() {
     }
 
     @Test
-    fun `vellykket henting av ad-token`(wmRuntimeInfo: WireMockRuntimeInfo) {
+    fun `vellykket henting av ad-token`() {
         stubFor(
             post("/token").willReturn(
                 okJson("{\"access_token\":\"$testAzureToken\", \"expires_in\": 10}")
@@ -74,7 +74,7 @@ class AzureTokenKonsumentTest : AaregTekniskHistorikkTest() {
     }
 
     @Test
-    fun `henting av ad-token feilet`(wmRuntimeInfo: WireMockRuntimeInfo) {
+    fun `henting av ad-token feilet`() {
         (LoggerFactory.getLogger(AzureKonsumentFeilmeldinger::class.java) as Logger).addAppender(logWatcher)
         stubFor(
             post("/token").willReturn(
