@@ -3,9 +3,15 @@ Aareg-teknisk-historikk
 
 API for utlevering av arbeidsforhold med teknisk historikk
 
-# Komme i gang
+# Komme i gang med utvikling
 
-TODO
+Dette repoet benytter kodegenerering for å lage api og modell-endepunkter.
+Endringer i specs må først gjøres i [openapi-spec.yaml](src/main/resources/static/openapi-spec.yaml)
+, og deretter kan man rekompilere med:
+
+```bash
+mvn clean compile
+```
 
 ---
 
