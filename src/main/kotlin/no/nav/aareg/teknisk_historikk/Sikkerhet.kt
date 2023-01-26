@@ -14,9 +14,6 @@ open class SecurityConfig {
         return http.csrf().disable().authorizeHttpRequests {
             it.antMatchers("/api/**")
                 .hasAnyAuthority("SCOPE_${SCOPE_KONTROLL_API}")
-                .requestMatchers(
-                    antMatcher("/actuator/**")
-                ).permitAll()
         }
             .exceptionHandling { it.authenticationEntryPoint(HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED)) }
             .oauth2ResourceServer { obj -> obj.jwt() }
