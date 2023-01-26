@@ -17,7 +17,10 @@ open class SecurityConfig {
             it.requestMatchers(antMatcher("/api/**"))
                 .hasAnyAuthority("SCOPE_${SCOPE_KONTROLL_API}")
                 .requestMatchers(
-                    antMatcher("/actuator/**")
+                    antMatcher("/actuator/**"),
+                    antMatcher("/swagger-ui/**"),
+                    antMatcher("/api-docs/**"),
+                    antMatcher("/openapi-spec.yaml")
                 ).permitAll()
         }
         .exceptionHandling { it.authenticationEntryPoint(HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED)) }
