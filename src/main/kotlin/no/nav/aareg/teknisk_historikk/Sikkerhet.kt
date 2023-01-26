@@ -16,6 +16,9 @@ open class SecurityConfig {
         .authorizeHttpRequests {
             it.requestMatchers(antMatcher("/api/**"))
                 .hasAnyAuthority("SCOPE_${SCOPE_KONTROLL_API}")
+                .requestMatchers(
+                    antMatcher("/actuator/**")
+                ).permitAll()
         }
         .exceptionHandling { it.authenticationEntryPoint(HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED)) }
         .oauth2ResourceServer { obj -> obj.jwt() }
