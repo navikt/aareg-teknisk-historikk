@@ -1,12 +1,12 @@
 package no.nav.aareg.teknisk_historikk
 
 import io.micrometer.core.instrument.MeterRegistry
-import jakarta.servlet.FilterChain
-import jakarta.servlet.http.HttpServletRequest
-import jakarta.servlet.http.HttpServletResponse
 import org.slf4j.MDC
 import org.springframework.stereotype.Component
 import org.springframework.web.filter.OncePerRequestFilter
+import javax.servlet.FilterChain
+import javax.servlet.http.HttpServletRequest
+import javax.servlet.http.HttpServletResponse
 
 const val AAREG_ARBEIDSFORHOLD_OPPSLAG_NAVN = "aareg_arbeidsforhold_oppslag"
 const val MDC_CONSUMER_ID = "consumerId"
