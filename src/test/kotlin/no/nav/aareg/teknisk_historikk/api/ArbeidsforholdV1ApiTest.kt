@@ -22,6 +22,7 @@ import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.web.client.TestRestTemplate
 import org.springframework.http.HttpEntity
+import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
 
@@ -80,6 +81,17 @@ class ArbeidsforholdV1ApiTest : AaregTekniskHistorikkTest() {
         )
 
         assertEquals(1, result.body?.antallArbeidsforhold ?: -1)
+    }
+
+    @Test
+    fun `bruker er ikke logget inn`() {
+        val result = testRestTemplate.postForEntity(
+            ENDEPUNKT_URI,
+            HttpEntity(gyldigSoekeparameter(), HttpHeaders().apply { setBearerAuth("FalskToken") }),
+            FinnTekniskHistorikkForArbeidstaker200Response::class.java
+        )
+
+        assertEquals(HttpStatus.UNAUTHORIZED, result.statusCode)
     }
 
     @Test
