@@ -1,5 +1,6 @@
 package no.nav.aareg.teknisk_historikk
 
+import jakarta.servlet.http.HttpServletRequest
 import no.nav.aareg.teknisk_historikk.models.TjenestefeilResponse
 import org.slf4j.LoggerFactory
 import org.springframework.core.Ordered
@@ -10,7 +11,6 @@ import org.springframework.web.HttpMediaTypeNotSupportedException
 import org.springframework.web.HttpRequestMethodNotSupportedException
 import org.springframework.web.bind.annotation.ControllerAdvice
 import org.springframework.web.bind.annotation.ExceptionHandler
-import javax.servlet.http.HttpServletRequest
 
 @ControllerAdvice
 @Order(Ordered.LOWEST_PRECEDENCE)
