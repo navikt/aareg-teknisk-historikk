@@ -5,7 +5,6 @@ import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.ObjectReader
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
-import jakarta.servlet.http.HttpServletRequest
 import no.nav.aareg.teknisk_historikk.*
 import no.nav.aareg.teknisk_historikk.aareg_services.contract.Arbeidsforhold
 import no.nav.aareg.teknisk_historikk.models.*
@@ -23,6 +22,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.client.HttpClientErrorException.*
 import org.springframework.web.client.HttpStatusCodeException
 import org.springframework.web.client.RestTemplate
+import javax.servlet.http.HttpServletRequest
 
 @ConfigurationProperties(prefix = "app.aareg.services")
 data class AaregServicesConfig(

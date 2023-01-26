@@ -2,7 +2,6 @@ package no.nav.aareg.teknisk_historikk.api
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import io.micrometer.core.instrument.MeterRegistry
-import jakarta.servlet.http.HttpServletRequest
 import no.nav.aareg.teknisk_historikk.aareg_services.AaregServicesKonsument
 import no.nav.aareg.teknisk_historikk.aareg_services.mapArbeidsforhold
 import no.nav.aareg.teknisk_historikk.loggOppslag
@@ -20,6 +19,7 @@ import org.springframework.web.context.request.NativeWebRequest
 import org.springframework.web.context.request.ServletWebRequest
 import java.util.*
 import java.util.Optional.ofNullable
+import javax.servlet.http.HttpServletRequest
 
 val EKSEMPEL_SOEK = ObjectMapper().writerFor(Soekeparametere::class.java).writeValueAsString(Soekeparametere().apply {
     arbeidstaker = "12345678912"
