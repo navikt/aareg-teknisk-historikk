@@ -2,6 +2,7 @@ package no.nav.aareg.teknisk_historikk
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.annotation.JsonProperty
+import jakarta.servlet.http.HttpServletRequest
 import no.nav.aareg.teknisk_historikk.models.TjenestefeilResponse
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -12,14 +13,12 @@ import org.springframework.core.annotation.Order
 import org.springframework.http.*
 import org.springframework.stereotype.Component
 import org.springframework.util.LinkedMultiValueMap
-import org.springframework.util.MultiValueMap
 import org.springframework.web.bind.annotation.ControllerAdvice
 import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.client.RestTemplate
 import java.time.LocalDateTime
 import java.time.LocalDateTime.now
 import java.util.*
-import javax.servlet.http.HttpServletRequest
 
 @ConfigurationProperties(prefix = "azure.app")
 data class AzureProperties(
