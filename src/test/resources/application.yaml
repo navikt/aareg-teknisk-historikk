@@ -9,3 +9,16 @@ azure.app:
   wellKnownUrl: '${wiremock.server.baseUrl}/wellknown'
 server:
   port: 23456
+management:
+  endpoint:
+    health:
+      probes:
+        enabled: true
+  endpoints:
+    web:
+      exposure:
+        include: prometheus,health
+  metrics:
+    export:
+      prometheus:
+        enabled: true
