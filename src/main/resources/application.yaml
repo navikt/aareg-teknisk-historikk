@@ -1,11 +1,10 @@
 springdoc:
   swagger-ui:
     url: /openapi-spec.yaml
+  api-docs:
+    path: /api-docs
 management:
   metrics:
-    export:
-      prometheus:
-        enabled: true
     distribution:
       percentiles-histogram:
         http:
@@ -24,6 +23,10 @@ management:
       enabled: true
     readinessstate:
       enabled: true
+  prometheus:
+    metrics:
+      export:
+        enabled: true
 spring:
   main:
     banner-mode: off

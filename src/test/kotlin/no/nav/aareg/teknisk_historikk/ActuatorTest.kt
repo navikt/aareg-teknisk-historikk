@@ -5,7 +5,9 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.web.client.TestRestTemplate
 import org.springframework.http.HttpStatus
+import org.springframework.test.annotation.DirtiesContext
 
+@DirtiesContext
 class ActuatorTest: AaregTekniskHistorikkTest() {
     @Autowired
     lateinit var testRestTemplate: TestRestTemplate
