@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.ObjectReader
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
+import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import jakarta.servlet.http.HttpServletRequest
 import no.nav.aareg.teknisk_historikk.*
 import no.nav.aareg.teknisk_historikk.aareg_services.contract.Arbeidsforhold
@@ -123,9 +124,10 @@ fun HttpHeaders.medSoekeparametere(soekeparametere: Soekeparametere) = HttpHeade
     }
 }
 
-private val reader: ObjectReader = ObjectMapper().apply {
-    this.registerModule(JavaTimeModule())
-}.readerForListOf(Arbeidsforhold::class.java)
+private val reader: ObjectReader = ObjectMapper()
+    .registerModule(JavaTimeModule())
+    .registerKotlinModule()
+    .readerForListOf(Arbeidsforhold::class.java)
 
 private class AaregServicesForbiddenException(e: Forbidden) : Exception(e)
 
