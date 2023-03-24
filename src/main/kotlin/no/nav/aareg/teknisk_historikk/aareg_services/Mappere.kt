@@ -29,13 +29,13 @@ private val mapAnsettelsesperiode = { ansettelsesperiode: Ansettelsesperiode ->
         startdato = ansettelsesperiode.startdato
         sluttdato = ansettelsesperiode.sluttdato
         sluttaarsak = ansettelsesperiode.sluttaarsak
-        sporingsinformasjon = mapSporingsinformasjon(ansettelsesperiode.sporingsinformasjon, ansettelsesperiode.bruksperiode.tom != null)
+        sporingsinformasjon = mapSporingsinformasjon(ansettelsesperiode.sporingsinformasjon, ansettelsesperiode.bruksperiode?.tom != null)
     }
 }
 
 private fun person(identobjekt: Identobjekt) = Person().apply {
     type = "Person"
-    offentligIdent = identobjekt.identer.first { it.type == "FOLKEREGISTERIDENT" && it.gjeldende }.ident
+    offentligIdent = identobjekt.identer.first { it.type == "FOLKEREGISTERIDENT" && it.gjeldende == true }.ident
 }
 
 private fun arbeidssted(identobjekt: Identobjekt) = identobjekt.let {

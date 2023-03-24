@@ -6,17 +6,14 @@ import com.fasterxml.jackson.annotation.JsonProperty
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class Identobjekt(
-    @JsonProperty(value = "type", required = false)
-    var type: String?,
-    @JsonProperty(value = "identer", required = true)
-    var identer: List<Ident>
+    @JsonProperty(required = false)
+    val type: String?,
+    val identer: List<Ident>
 )
 
 data class Ident(
-    @JsonProperty(value = "type", required = true)
-    var type: String,
-    @JsonProperty(value = "ident", required = true)
-    var ident: String,
-    @JsonProperty(value = "gjeldende", required = false)
-    var gjeldende: Boolean
+    val type: String,
+    val ident: String,
+    @JsonProperty(required = false)
+    val gjeldende: Boolean?
 )
