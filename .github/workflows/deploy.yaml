@@ -58,7 +58,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: nais/deploy/actions/deploy@v2
         env:
-          CLUSTER: prod-fss
+          CLUSTER: prod-gcp
           RESOURCE: .nais/aareg-teknisk-historikk.yaml
           VARS: .nais/prod.yaml
           ENVIRONMENT: prod-gcp:arbeidsforhold:aareg-teknisk-historikk
