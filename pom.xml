@@ -7,7 +7,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.0.3</version>
+        <version>3.3.5</version>
     </parent>
 
     <artifactId>teknisk-historikk</artifactId>
@@ -20,10 +20,10 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <kotlin.code.style>official</kotlin.code.style>
-        <kotlin.compiler.jvmTarget>17</kotlin.compiler.jvmTarget>
+        <kotlin.compiler.jvmTarget>21</kotlin.compiler.jvmTarget>
         <kotlin.version>1.8.10</kotlin.version>
-        <maven.compiler.source>17</maven.compiler.source>
-        <maven.compiler.target>17</maven.compiler.target>
+        <maven.compiler.source>21</maven.compiler.source>
+        <maven.compiler.target>21</maven.compiler.target>
         <nimbus-jose-jwt.version>9.30.2</nimbus-jose-jwt.version>
         <micrometer.version>1.10.0</micrometer.version>
         <logstash-logback-encoder.version>7.3</logstash-logback-encoder.version>

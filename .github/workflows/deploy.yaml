@@ -4,55 +4,80 @@ on:
   push:
     branches:
       - 'main'
-
-env:
-  IMAGE: ghcr.io/${{ github.repository }}/aareg-teknisk-historikk:${{ github.sha }}
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: "Hvilket environment skal deployes?"
+        required: true
+        default: dev
+        options:
+          - p
+          - dev
 
 jobs:
-  build-jar-docker:
-    name: build-jar-docker
+  build_and_push:
+    name: Build and push Docker image
+    permissions:
+      contents: read
+      id-token: write
+    outputs:
+      docker_image: ${{ steps.docker-push.outputs.image }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
-      - name: JDK
-        uses: actions/setup-java@v3
+        uses: actions/checkout@v4
+      - name: Configure JDK
+        uses: actions/setup-java@v4
         with:
-          distribution: zulu
-          java-version: 17
-          cache: maven
+          distribution: 'temurin'
+          java-version: '21'
+          cache: 'maven'
       - name: Build
-        run: mvn clean package
-      - name: Build and publish Docker image
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          docker build --tag ${IMAGE} .
-          docker login ghcr.io -u ${GITHUB_REPOSITORY} -p ${GITHUB_TOKEN}
-          docker push ${IMAGE}
+          GITHUB_ACTOR: ${{ github.actor }}
+          ACCESS_TOKEN: ${{ secrets.PAT }}
+        run: mvn clean package --also-make --threads=2 --batch-mode --settings maven-settings.xml
+      - uses: nais/docker-build-push@v0
+        id: docker-push
+        with:
+          team: arbeidsforhold
+          project_id: ${{ vars.NAIS_MANAGEMENT_PROJECT_ID }}
+          identity_provider: ${{ secrets.NAIS_WORKLOAD_IDENTITY_PROVIDER }}
+          build_args: |
+            JAR_PATH=target/app.jar
 
   deploy-prod:
-    name: Deploy to NAIS Prod-gcp
-    needs: build-jar-docker
+    name: Deploy to NAIS Prod-fss
+    needs: build_and_push
+    permissions:
+      contents: read
+      id-token: write
+    if: github.ref == 'refs/heads/main' || github.event.inputs.environment == 'p'
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      - uses: nais/deploy/actions/deploy@v1
+      - uses: actions/checkout@v4
+      - uses: nais/deploy/actions/deploy@v2
         env:
-          APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
-          CLUSTER: prod-gcp
+          CLUSTER: prod-fss
           RESOURCE: .nais/aareg-teknisk-historikk.yaml
           VARS: .nais/prod.yaml
+          ENVIRONMENT: prod-gcp:arbeidsforhold:aareg-teknisk-historikk
+          IMAGE: ${{ needs.build_and_push.outputs.docker_image }}
 
   deploy-dev:
     name: Deploy to NAIS Dev-gcp
-    needs: build-jar-docker
+    needs: build_and_push
+    permissions:
+      contents: read
+      id-token: write
+    if: github.ref == 'refs/heads/main' || github.event.inputs.environment == 'dev'
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      - uses: nais/deploy/actions/deploy@v1
+      - uses: actions/checkout@v4
+      - uses: nais/deploy/actions/deploy@v2
         env:
-          APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
           CLUSTER: dev-gcp
           RESOURCE: .nais/aareg-teknisk-historikk.yaml
           VARS: .nais/dev.yaml
+          ENVIRONMENT: dev-gcp:arbeidsforhold:aareg-teknisk-historikk
+          IMAGE: ${{ needs.build_and_push.outputs.docker_image }}
