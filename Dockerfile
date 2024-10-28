@@ -1,4 +1,6 @@
-FROM navikt/java:17-appdynamics
+FROM ghcr.io/navikt/baseimages/temurin:21
 LABEL maintainer="Team Arbeidsforhold"
 
-ADD target/app.jar /app/app.jar
+ARG JAR_PATH
+
+ADD $JAR_PATH /app/app.jar
