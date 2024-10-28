@@ -36,7 +36,7 @@ jobs:
         env:
           GITHUB_ACTOR: ${{ github.actor }}
           ACCESS_TOKEN: ${{ secrets.PAT }}
-        run: mvn clean package --also-make --threads=2 --batch-mode --settings maven-settings.xml
+        run: mvn clean package --also-make --threads=2 --batch-mode
       - uses: nais/docker-build-push@v0
         id: docker-push
         with:
