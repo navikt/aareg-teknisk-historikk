@@ -21,4 +21,4 @@ Spørsmål knyttet til koden eller prosjektet kan stilles som issues her på Git
 
 ## For NAV-ansatte
 
-Interne henvendelser kan sendes via Slack i kanalen #dv-team-arbeidsforhold.
+Interne henvendelser kan sendes via Slack i kanalen #team-arbeidsforhold.
