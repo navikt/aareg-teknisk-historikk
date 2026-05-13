@@ -24,13 +24,13 @@ spec:
     max: 2
     cpuThresholdPercentage: 50
   liveness:
-    path: actuator/health/liveness
+    path: /actuator/health/liveness
     initialDelay: 60
     periodSeconds: 2
     timeout: 2
     failureThreshold: 30
   readiness:
-    path: actuator/health/readiness
+    path: /actuator/health/readiness
     initialDelay: 60
     periodSeconds: 2
     timeout: 2
