@@ -1,9 +1,13 @@
 app:
   name: aareg-teknisk-historikk-test
-app.aareg.services:
-  url: '${wiremock.server.baseUrl}'
-azure.app:
-  wellKnownUrl: '${wiremock.server.baseUrl}/wellknown'
+  url.aareg.services: http://localhost:${wiremock.server.port}/aareg-services
+  texas.target.aareg.services: "test:arbeidsforhold:aareg-services"
+  security:
+    oidc:
+      idp:
+        maskinporten:
+          issuerUrl: http://localhost:${wiremock.server.port}/maskinporten
+          jwkSetUri: http://localhost:${wiremock.server.port}/maskinporten/jwks
 server:
   port: 23456
 spring:
@@ -13,3 +17,6 @@ spring:
         jwt:
           issuer-uri: DUMMY
           jwk-set-uri: DUMMY
+
+nais.token.exchange.endpoint: http://localhost:${wiremock.server.port}/exchange
+nais.token.endpoint: http://localhost:${wiremock.server.port}/token
