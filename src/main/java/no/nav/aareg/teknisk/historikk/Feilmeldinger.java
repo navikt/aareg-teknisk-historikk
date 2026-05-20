@@ -1,10 +1,13 @@
 package no.nav.aareg.teknisk.historikk;
 
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.extern.slf4j.Slf4j;
 import no.nav.aareg.teknisk.historikk.config.UpstreamServiceException;
 import no.nav.aareg.teknisk.historikk.provider.api.contract.TjenestefeilResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.Marker;
+import org.slf4j.MarkerFactory;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -17,14 +20,14 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-@ControllerAdvice
+@Slf4j
 @Order
+@ControllerAdvice
 public class Feilmeldinger {
 
     private static final String KORRELASJONSID_HEADER = "correlation-id";
 
-    private final Logger log = LoggerFactory.getLogger(Feilmeldinger.class);
-    private final Logger secureLog = LoggerFactory.getLogger("secureLogger");
+    private static final Marker TEAM_LOGS_MARKER = MarkerFactory.getMarker("TEAM_LOGS");
 
     @ExceptionHandler(HttpMediaTypeNotSupportedException.class)
     public ResponseEntity<TjenestefeilResponse> feilMediaType(HttpMediaTypeNotSupportedException exception, HttpServletRequest httpServletRequest) {
@@ -58,7 +61,7 @@ public class Feilmeldinger {
     @ExceptionHandler(Exception.class)
     public ResponseEntity<TjenestefeilResponse> generiskFeil(Exception exception, HttpServletRequest httpServletRequest) {
         log.error("Uhandtert feil oppstod. Sjekk sikker log for detaljer");
-        secureLog.error("Uhandtert feil oppstod", exception);
+        log.error(TEAM_LOGS_MARKER, "Uhandtert feil oppstod", exception);
         return tjenestefeilRespons(httpServletRequest, HttpStatus.INTERNAL_SERVER_ERROR, "En ukjent feil oppstod");
     }
 
