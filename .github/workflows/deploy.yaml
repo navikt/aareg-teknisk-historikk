@@ -59,8 +59,7 @@ jobs:
       - uses: nais/deploy/actions/deploy@v2
         env:
           CLUSTER: prod-gcp
-          RESOURCE: .nais/aareg-teknisk-historikk.yaml
-          VARS: .nais/prod.yaml
+          RESOURCE: .nais/prod-gcp.yaml
           ENVIRONMENT: prod-gcp:arbeidsforhold:aareg-teknisk-historikk
           IMAGE: ${{ needs.build_and_push.outputs.docker_image }}
 
@@ -77,7 +76,6 @@ jobs:
       - uses: nais/deploy/actions/deploy@v2
         env:
           CLUSTER: dev-gcp
-          RESOURCE: .nais/aareg-teknisk-historikk.yaml
-          VARS: .nais/dev.yaml
+          RESOURCE: .nais/dev-gcp.yaml
           ENVIRONMENT: dev-gcp:arbeidsforhold:aareg-teknisk-historikk
           IMAGE: ${{ needs.build_and_push.outputs.docker_image }}

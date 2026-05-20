@@ -1,0 +1,62 @@
+# @name Hent token for testing
+GET {{token_ingress}}/token
+
+> {%
+    client.global.set("bearer_token", response.body)
+%}
+
+
+###
+
+# @name Finn teknisk historikk for arbeidstaker (minimum)
+POST {{ingress}}/api/v1/arbeidsforhold
+Authorization: Bearer {{bearer_token}}
+Content-Type: application/json
+
+{
+  "arbeidstaker": "12345678912",
+  "opplysningspliktig": null,
+  "arbeidssted": null
+}
+
+> {%
+    client.test("Request executed successfully", function () {
+        client.assert(response.status === 200, "Response status is not 200");
+    });
+%}
+
+###
+
+# @name Finn teknisk historikk for arbeidstaker (alle felter)
+POST {{ingress}}/api/v1/arbeidsforhold
+Authorization: Bearer {{bearer_token}}
+Content-Type: application/json
+
+{
+  "arbeidstaker": "12345678912",
+  "opplysningspliktig": "987654321",
+  "arbeidssted": "999999999"
+}
+
+> {%
+    client.test("Request executed successfully", function () {
+        client.assert(response.status === 200, "Response status is not 200");
+    });
+%}
+
+###
+
+# @name Finn teknisk historikk for arbeidstaker (valideringsfeil)
+POST {{ingress}}/api/v1/arbeidsforhold
+Authorization: Bearer {{bearer_token}}
+Content-Type: application/json
+
+{
+  "arbeidstaker": "abc"
+}
+
+> {%
+    client.test("Request failed with validation error", function () {
+        client.assert(response.status === 400, "Response status is not 400");
+    });
+%}

@@ -95,6 +95,9 @@
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
+                <configuration>
+                    <mainClass>no.nav.aareg.teknisk.historikk.Main</mainClass>
+                </configuration>
             </plugin>
 
             <plugin>
