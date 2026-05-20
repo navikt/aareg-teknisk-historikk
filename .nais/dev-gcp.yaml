@@ -66,6 +66,4 @@ spec:
     outbound:
       external:
         - host: aareg-services.dev-fss-pub.nais.io
-  secureLogs:
-    enabled: true
 
