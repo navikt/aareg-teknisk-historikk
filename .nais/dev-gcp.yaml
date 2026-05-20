@@ -13,9 +13,9 @@ spec:
   env:
     - name: APP_NAME
       value: aareg-teknisk-historikk
-    - name: APP_AAREG_SERVICES_URL
+    - name: APP_URL_AAREG_SERVICES
       value: https://aareg-services.dev-fss-pub.nais.io
-    - name: APP_AAREG_SERVICES_SCOPE
+    - name: APP_TEXAS_TARGET_AAREG_SERVICES
       value: api://dev-fss.arbeidsforhold.aareg-services-nais/.default
   replicas:
     min: 2
