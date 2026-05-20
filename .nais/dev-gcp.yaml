@@ -1,0 +1,71 @@
+apiVersion: nais.io/v1alpha1
+kind: Application
+metadata:
+  name: aareg-teknisk-historikk
+  namespace: arbeidsforhold
+  labels:
+    team: arbeidsforhold
+spec:
+  image: {{image}}
+  port: 8080
+  ingresses:
+    - https://aareg-teknisk-historikk.ekstern.dev.nav.no
+  env:
+    - name: APP_NAME
+      value: aareg-teknisk-historikk
+    - name: APP_AAREG_SERVICES_URL
+      value: https://aareg-services.dev-fss-pub.nais.io
+    - name: APP_AAREG_SERVICES_SCOPE
+      value: api://dev-fss.arbeidsforhold.aareg-services-nais/.default
+  replicas:
+    min: 2
+    max: 2
+    cpuThresholdPercentage: 50
+  liveness:
+    path: /actuator/health/liveness
+    initialDelay: 60
+    periodSeconds: 2
+    timeout: 2
+    failureThreshold: 30
+  readiness:
+    path: /actuator/health/readiness
+    initialDelay: 60
+    periodSeconds: 2
+    timeout: 2
+    failureThreshold: 30
+  resources:
+    requests:
+      cpu: 100m
+      memory: 500Mi
+    limits:
+      memory: 10Gi
+  prometheus:
+    enabled: true
+    path: actuator/prometheus
+  azure:
+    application:
+      enabled: true
+  maskinporten:
+    enabled: true
+    scopes:
+      exposes:
+        - name: v1/arbeidsforhold/tekniskhistorikk
+          enabled: true
+          product: aareg
+          atMaxAge: 180
+          delegationSource: altinn
+          separator: "/"
+          consumers:
+            - name: NAV
+              orgno: "889640782"
+            - name: Barekstad (test-organisasjon)
+              orgno: "810514442"
+            - name: Fellesordningen for AFP
+              orgno: "987414502"
+  accessPolicy:
+    outbound:
+      external:
+        - host: aareg-services.dev-fss-pub.nais.io
+  secureLogs:
+    enabled: true
+

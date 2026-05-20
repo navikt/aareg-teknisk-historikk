@@ -1,3 +1,0 @@
-aaregservices_host: aareg-services.prod-fss-pub.nais.io
-aaregservices_scope: api://prod-fss.arbeidsforhold.aareg-services-nais/.default
-ingress: https://aareg-teknisk-historikk.nav.no

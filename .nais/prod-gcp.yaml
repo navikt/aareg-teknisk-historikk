@@ -6,19 +6,17 @@ metadata:
   labels:
     team: arbeidsforhold
 spec:
+  image: {{image}}
+  port: 8080
+  ingresses:
+    - https://aareg-teknisk-historikk.nav.no
   env:
     - name: APP_NAME
       value: aareg-teknisk-historikk
     - name: APP_AAREG_SERVICES_URL
-      value: https://{{aaregservices_host}}
+      value: https://aareg-services.prod-fss-pub.nais.io
     - name: APP_AAREG_SERVICES_SCOPE
-      value: {{aaregservices_scope}}
-    - name: SPRING_PROFILES_ACTIVE
-      value: log-logstash
-  image: {{image}}
-  port: 8080
-  ingresses:
-    - {{ingress}}
+      value: api://prod-fss.arbeidsforhold.aareg-services-nais/.default
   replicas:
     min: 2
     max: 2
@@ -40,7 +38,6 @@ spec:
       cpu: 100m
       memory: 2048Mi
     limits:
-      cpu: 1000m
       memory: 3072Mi
   prometheus:
     enabled: true
@@ -51,11 +48,20 @@ spec:
   maskinporten:
     enabled: true
     scopes:
-      consumes:
-        - name: nav:aareg/v1/arbeidsforhold/tekniskhistorikk
+      exposes:
+        - name: v1/arbeidsforhold/tekniskhistorikk
+          enabled: true
+          product: aareg
+          atMaxAge: 180
+          delegationSource: altinn
+          separator: "/"
+          consumers:
+            - name: Fellesordningen for AFP
+              orgno: "987414502"
   accessPolicy:
     outbound:
       external:
-        - host: {{aaregservices_host}}
+        - host: aareg-services.prod-fss-pub.nais.io
   secureLogs:
     enabled: true
+
