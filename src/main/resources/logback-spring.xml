@@ -1,12 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
     <springProperty name="app.name" source="app.name"/>
+
     <appender name="team-logs" class="net.logstash.logback.appender.LogstashTcpSocketAppender">
         <destination>team-logs.nais-system:5170</destination>
         <encoder class="net.logstash.logback.encoder.LogstashEncoder">
-            <customFields>
-                {"google_cloud_project":"${GOOGLE_CLOUD_PROJECT}","nais_namespace_name":"${NAIS_NAMESPACE}","nais_pod_name":"${NAIS_POD_NAME}","nais_container_name":"${NAIS_APP_NAME}"}
-            </customFields>
+            <customFields>{"google_cloud_project":"${GOOGLE_CLOUD_PROJECT}","nais_namespace_name":"${NAIS_NAMESPACE}","nais_pod_name":"${NAIS_POD_NAME}","nais_container_name":"${NAIS_APP_NAME}"}</customFields>
             <includeContext>false</includeContext>
         </encoder>
         <filter class="ch.qos.logback.core.filter.EvaluatorFilter">
@@ -19,7 +18,7 @@
     </appender>
 
     <appender name="default-json" class="ch.qos.logback.core.ConsoleAppender">
-        <encoder class="net.logstash.logback.encoder.LogstashEncoder"/>
+        <encoder class="net.logstash.logback.encoder.LogstashEncoder" />
         <filter class="ch.qos.logback.core.filter.EvaluatorFilter">
             <evaluator class="ch.qos.logback.classic.boolex.OnMarkerEvaluator">
                 <marker>TEAM_LOGS</marker>
@@ -29,12 +28,33 @@
         </filter>
     </appender>
 
-    <root level="INFO">
-        <appender-ref ref="default-json"/>
-        <appender-ref ref="team-logs"/>
+    <appender name="auditLog" class="com.papertrailapp.logback.Syslog4jAppender">
+        <layout class="ch.qos.logback.classic.PatternLayout">
+            <pattern>%m%n%xEx</pattern>
+        </layout>
+
+        <syslogConfig class="org.productivity.java.syslog4j.impl.net.tcp.TCPNetSyslogConfig">
+            <!-- remote system to log to -->
+            <host>audit.nais</host>
+            <!-- remote port to log to -->
+            <port>6514</port>
+            <!-- application -->
+            <ident>${app.name}</ident>
+            <!-- max log message length in bytes -->
+            <maxMessageLength>128000</maxMessageLength>
+        </syslogConfig>
+    </appender>
+
+    <logger name="auditLogger" level="INFO" additivity="false">
+        <appender-ref ref="auditLog"/>
+    </logger>
+
+    <root level="WARN">
+        <appender-ref ref="default-json" />
+        <appender-ref ref="team-logs" />
     </root>
 
     <logger name="team-logs-logger" level="INFO" additivity="false">
-        <appender-ref ref="team-logs"/>
+        <appender-ref ref="team-logs" />
     </logger>
 </configuration>

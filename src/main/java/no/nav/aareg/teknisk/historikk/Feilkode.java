@@ -4,7 +4,7 @@ public enum Feilkode {
     AAREG_SERVICES_ERROR("AS1", "Feil ved henting av arbeidsforhold"),
     AAREG_SERVICES_UNAUTHORIZED("AS2", "Feil ved henting av arbeidsforhold"),
     AAREG_SERVICES_MALFORMED("AS3", "Feil ved henting av arbeidsforhold"),
-    AAREG_SERVICES_FORBIDDEN("AS4", "Du mangler tilgang til ressursen"),
+    AAREG_SERVICES_FORBIDDEN("AS4", "Ingen tilgang til arbeidstaker"),
     AZURE_KONSUMENT_FEIL("AD1", "En feil oppstod");
 
     private final String feilkode;

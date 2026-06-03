@@ -1,7 +1,11 @@
 package no.nav.aareg.teknisk.historikk.wiremock.aareg.services;
 
 import com.github.tomakehurst.wiremock.client.WireMock;
+import no.nav.aareg.kontrakter.teknisk.historikk.TekniskHistorikkResponse;
 import no.nav.aareg.teknisk.historikk.wiremock.WireMockStub;
+import tools.jackson.databind.json.JsonMapper;
+
+import java.util.List;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 import static com.github.tomakehurst.wiremock.client.WireMock.equalTo;
@@ -13,7 +17,8 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 public class AaregServicesStub implements WireMockStub {
 
-    public static final String TEKNISK_HISTORIKK_PATH = "/aareg-services/todo";
+    public static final String TEKNISK_HISTORIKK_PATH = "/aareg-services/api/teknisk-historikk/afp";
+    private final JsonMapper jsonMapper = new JsonMapper();
 
     @Override
     public void registerResponseMappingBeforeAll() {
@@ -27,45 +32,30 @@ public class AaregServicesStub implements WireMockStub {
     }
 
     public void stubTekniskHistorikkOk() {
-        stubPostTekniskHistorikk(OK.value(), "{\"arbeidsforholdListe\":[]}");
+        var emptyBody = new TekniskHistorikkResponse(List.of());
+        stubPostTekniskHistorikk(OK.value(), emptyBody);
     }
 
     public void stubLegacyTekniskHistorikkOk() {
-        stubLegacyTekniskHistorikk(OK.value(), "{\"arbeidsforholdListe\":[]}");
+        var emptyBody = new TekniskHistorikkResponse(List.of());
+        stubLegacyTekniskHistorikk(OK.value(), emptyBody);
     }
 
-    public void stubPostTekniskHistorikk(int statusCode, String responseBody) {
+    public void stubPostTekniskHistorikk(int statusCode, TekniskHistorikkResponse responseBody) {
         WireMock.stubFor(post(urlPathEqualTo(TEKNISK_HISTORIKK_PATH))
                 .willReturn(jsonResponse(statusCode, responseBody)));
     }
 
-    public void stubLegacyTekniskHistorikk(int statusCode, String responseBody) {
+    public void stubLegacyTekniskHistorikk(int statusCode, TekniskHistorikkResponse responseBody) {
         WireMock.stubFor(post(urlPathEqualTo(TEKNISK_HISTORIKK_PATH))
-                .willReturn(jsonResponse(statusCode, normalizeLegacyBody(responseBody))));
+                .willReturn(jsonResponse(statusCode, responseBody)));
     }
 
-    public void stubLegacyTekniskHistorikkWithHeaders(int statusCode, String responseBody,
-                                                      String personident, String opplysningspliktigident, String arbeidsstedident) {
-        WireMock.stubFor(post(urlPathEqualTo(TEKNISK_HISTORIKK_PATH))
-                .withHeader("Nav-Personident", equalTo(personident))
-                .withHeader("Nav-Opplysningspliktigident", equalTo(opplysningspliktigident))
-                .withHeader("Nav-Arbeidsstedident", equalTo(arbeidsstedident))
-                .willReturn(jsonResponse(statusCode, normalizeLegacyBody(responseBody))));
-    }
-
-    private static String normalizeLegacyBody(String responseBody) {
-        var trimmedBody = responseBody == null ? "" : responseBody.trim();
-        if (trimmedBody.startsWith("[")) {
-            return "{\"arbeidsforholdListe\":" + responseBody + "}";
-        }
-        return responseBody;
-    }
-
-    private static com.github.tomakehurst.wiremock.client.ResponseDefinitionBuilder jsonResponse(int statusCode, String responseBody) {
+    private com.github.tomakehurst.wiremock.client.ResponseDefinitionBuilder jsonResponse(int statusCode, TekniskHistorikkResponse responseBody) {
         return aResponse()
                 .withStatus(statusCode)
                 .withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
-                .withBody(responseBody);
+                .withBody(jsonMapper.writeValueAsString(responseBody));
     }
 }
 
