@@ -32,6 +32,11 @@ spec:
     - name: APP_SECURITY_OIDC_IDP_MASKINPORTEN_JWKSETURI
       value: https://maskinporten.no/jwks
 
+  observability:
+    autoInstrumentation:
+      enabled: true
+      runtime: java
+
   replicas:
     min: 2
     max: 2
