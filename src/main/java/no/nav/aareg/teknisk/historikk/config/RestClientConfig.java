@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpStatusCode;
+import org.springframework.http.MediaType;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.web.client.RestClient;
 
@@ -20,8 +21,11 @@ public class RestClientConfig {
     private static final Marker TEAM_LOGS_MARKER = MarkerFactory.getMarker("TEAM_LOGS");
 
     @Bean
-    RestClient azureRestClient() {
-        return restClientBuilder("Azure").build();
+    RestClient aaregTilgangskontrollRestClient(@Value("${app.url.aareg.tilgangskontroll}") String baseUrl) {
+        return restClientBuilder("Tilgangskontroll")
+                .defaultHeaders(httpHeaders -> httpHeaders.setContentType(MediaType.APPLICATION_JSON))
+                .baseUrl(baseUrl)
+                .build();
     }
 
     @Bean

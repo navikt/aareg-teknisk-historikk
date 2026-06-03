@@ -5,7 +5,7 @@ import jakarta.servlet.http.HttpServletRequest;
 
 public final class KonsumentLogging {
 
-    public static final String AAREG_ARBEIDSFORHOLD_OPPSLAG_NAVN = "aareg_arbeidsforhold_oppslag";
+    public static final String AAREG_TEKNISK_HISTORIKK_OPPSLAG_NAVN = "aareg_teknisk_historikk_oppslag";
     public static final String MDC_CONSUMER_ID = "consumerId";
     public static final String MDC_SUPPLIER_ID = "supplierId";
     public static final String OPPSLAGSTYPE_METRIC_TAG_NAVN = "oppslagstype";
@@ -15,13 +15,13 @@ public final class KonsumentLogging {
     private KonsumentLogging() {
     }
 
-    public static void loggOppslag(MeterRegistry meterRegistry, HttpServletRequest request, String oppslagsnavn, int size) {
+    public static void loggOppslag(MeterRegistry meterRegistry, HttpServletRequest request, String oppslagsnavn) {
         meterRegistry.counter(
-                AAREG_ARBEIDSFORHOLD_OPPSLAG_NAVN,
+                AAREG_TEKNISK_HISTORIKK_OPPSLAG_NAVN,
                 OPPSLAGSTYPE_METRIC_TAG_NAVN, oppslagsnavn,
                 ORG_NUMMER_METRIC_TAG_NAVN, (String) request.getAttribute(MDC_CONSUMER_ID),
                 DATABEHANDLER_METRIC_TAG_NAVN, (String) java.util.Objects.requireNonNullElse(request.getAttribute(MDC_SUPPLIER_ID), "")
-        ).increment(size);
+        ).increment();
     }
 }
 

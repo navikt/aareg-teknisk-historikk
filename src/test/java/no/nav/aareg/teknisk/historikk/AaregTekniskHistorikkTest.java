@@ -1,18 +1,18 @@
 package no.nav.aareg.teknisk.historikk;
 
+import net.minidev.json.JSONObject;
 import no.nav.aareg.teknisk.historikk.wiremock.WireMockStubs;
 import no.nav.aareg.teknisk.historikk.wiremock.aareg.services.AaregServicesStub;
+import no.nav.aareg.teknisk.historikk.wiremock.aareg.tilgangskontroll.AaregTilgangskontrollStub;
 import no.nav.aareg.teknisk.historikk.wiremock.maskinporten.MaskinportenStub;
 import no.nav.aareg.teknisk.historikk.wiremock.texas.TexasStub;
 import org.junit.jupiter.api.BeforeEach;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.resttestclient.autoconfigure.AutoConfigureRestTestClient;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpHeaders;
 import org.springframework.test.context.ActiveProfiles;
 
 import java.util.Map;
-import net.minidev.json.JSONObject;
 import java.util.function.Function;
 
 @ActiveProfiles("test")
@@ -20,17 +20,14 @@ import java.util.function.Function;
 @WireMockStubs({
         TexasStub.class,
         AaregServicesStub.class,
+        AaregTilgangskontrollStub.class,
         MaskinportenStub.class
 })
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT, classes = Main.class)
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, classes = Main.class)
 public class AaregTekniskHistorikkTest {
 
-    public static final int WIREMOCK_PORT = 23457;
-    public static final String TEST_TOKEN = "testmaskinportentoken";
-    public static final String TEST_AZURE_TOKEN = "testazuretoken";
     public static final String TESTORG = "98765432";
     public static final String TESTSUPPLIER = "89765432";
-    public static final String KORRELASJONSID_HEADER = "correlation-id";
     public static final String TEST_SCOPE = "nav:aareg/v1/arbeidsforhold/tekniskhistorikk";
 
     private static Function<Boolean, String> tokenProvider = includeSupplier -> {
@@ -38,7 +35,7 @@ public class AaregTekniskHistorikkTest {
     };
 
     protected AaregServicesStub aaregServicesStub;
-
+    protected AaregTilgangskontrollStub aaregTilgangskontrollStub;
     protected MaskinportenStub maskinportenStub;
 
     @BeforeEach
@@ -62,19 +59,6 @@ public class AaregTekniskHistorikkTest {
     public static HttpHeaders medAutentiseringMedDatabehandler(HttpHeaders headers) {
         headers.setBearerAuth(maskinportenToken(true));
         return headers;
-    }
-
-    public static HttpHeaders medKorrelasjonsid(HttpHeaders headers) {
-        return medKorrelasjonsid(headers, "korrelasjonsid");
-    }
-
-    public static HttpHeaders medKorrelasjonsid(HttpHeaders headers, String korrelasjonsid) {
-        headers.set(KORRELASJONSID_HEADER, korrelasjonsid);
-        return headers;
-    }
-
-    public static HttpHeaders headerMedAutentiseringOgKorrelasjon() {
-        return medKorrelasjonsid(headerMedAutentisering());
     }
 
     private static String maskinportenToken(boolean includeSupplier) {

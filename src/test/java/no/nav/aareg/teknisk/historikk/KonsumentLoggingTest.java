@@ -1,16 +1,15 @@
 package no.nav.aareg.teknisk.historikk;
 
-import com.github.tomakehurst.wiremock.client.WireMock;
 import io.micrometer.core.instrument.MeterRegistry;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.web.servlet.client.RestTestClient;
 
-import static no.nav.aareg.teknisk.historikk.KonsumentLogging.AAREG_ARBEIDSFORHOLD_OPPSLAG_NAVN;
+import static no.nav.aareg.teknisk.historikk.KonsumentLogging.AAREG_TEKNISK_HISTORIKK_OPPSLAG_NAVN;
 import static no.nav.aareg.teknisk.historikk.KonsumentLogging.DATABEHANDLER_METRIC_TAG_NAVN;
 import static no.nav.aareg.teknisk.historikk.KonsumentLogging.OPPSLAGSTYPE_METRIC_TAG_NAVN;
 import static no.nav.aareg.teknisk.historikk.KonsumentLogging.ORG_NUMMER_METRIC_TAG_NAVN;
-import static no.nav.aareg.teknisk.historikk.api.ApiTestData.ARBEIDSFORHOLD_1;
+import static no.nav.aareg.teknisk.historikk.api.ApiTestData.TEKNISK_HISTORIKK_RESPONSE_1;
 import static no.nav.aareg.teknisk.historikk.api.ApiTestData.gyldigSoekeparameter;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -28,10 +27,10 @@ class KonsumentLoggingTest extends AaregTekniskHistorikkTest {
 
     @Test
     void loggerOppslagsmetrikkerForKonsumenter() {
-        aaregServicesStub.stubLegacyTekniskHistorikk(200, ARBEIDSFORHOLD_1);
+        aaregServicesStub.stubLegacyTekniskHistorikk(200, TEKNISK_HISTORIKK_RESPONSE_1);
 
         double forrigeTeller = meterRegistry.counter(
-                AAREG_ARBEIDSFORHOLD_OPPSLAG_NAVN,
+                AAREG_TEKNISK_HISTORIKK_OPPSLAG_NAVN,
                 OPPSLAGSTYPE_METRIC_TAG_NAVN, FINN_TEKNISK_HISTORIKK_NAVN,
                 ORG_NUMMER_METRIC_TAG_NAVN, TESTORG,
                 DATABEHANDLER_METRIC_TAG_NAVN, ""
@@ -45,7 +44,7 @@ class KonsumentLoggingTest extends AaregTekniskHistorikkTest {
                 .expectStatus().isOk();
 
         assertEquals(1.0, meterRegistry.counter(
-                AAREG_ARBEIDSFORHOLD_OPPSLAG_NAVN,
+                AAREG_TEKNISK_HISTORIKK_OPPSLAG_NAVN,
                 OPPSLAGSTYPE_METRIC_TAG_NAVN, FINN_TEKNISK_HISTORIKK_NAVN,
                 ORG_NUMMER_METRIC_TAG_NAVN, TESTORG,
                 DATABEHANDLER_METRIC_TAG_NAVN, ""
@@ -54,10 +53,10 @@ class KonsumentLoggingTest extends AaregTekniskHistorikkTest {
 
     @Test
     void loggerOppslagsmetrikkerForDatabehandlere() {
-        aaregServicesStub.stubLegacyTekniskHistorikk(200, ARBEIDSFORHOLD_1);
+        aaregServicesStub.stubLegacyTekniskHistorikk(200, TEKNISK_HISTORIKK_RESPONSE_1);
 
         double forrigeTeller = meterRegistry.counter(
-                AAREG_ARBEIDSFORHOLD_OPPSLAG_NAVN,
+                AAREG_TEKNISK_HISTORIKK_OPPSLAG_NAVN,
                 OPPSLAGSTYPE_METRIC_TAG_NAVN, FINN_TEKNISK_HISTORIKK_NAVN,
                 ORG_NUMMER_METRIC_TAG_NAVN, TESTORG,
                 DATABEHANDLER_METRIC_TAG_NAVN, TESTSUPPLIER
@@ -71,7 +70,7 @@ class KonsumentLoggingTest extends AaregTekniskHistorikkTest {
                 .expectStatus().isOk();
 
         assertEquals(1.0, meterRegistry.counter(
-                AAREG_ARBEIDSFORHOLD_OPPSLAG_NAVN,
+                AAREG_TEKNISK_HISTORIKK_OPPSLAG_NAVN,
                 OPPSLAGSTYPE_METRIC_TAG_NAVN, FINN_TEKNISK_HISTORIKK_NAVN,
                 ORG_NUMMER_METRIC_TAG_NAVN, TESTORG,
                 DATABEHANDLER_METRIC_TAG_NAVN, TESTSUPPLIER

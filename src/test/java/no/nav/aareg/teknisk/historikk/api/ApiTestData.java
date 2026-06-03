@@ -1,9 +1,13 @@
 package no.nav.aareg.teknisk.historikk.api;
 
+import no.nav.aareg.kontrakter.teknisk.historikk.TekniskHistorikk;
+import no.nav.aareg.kontrakter.teknisk.historikk.TekniskHistorikkResponse;
 import no.nav.aareg.teknisk.historikk.provider.api.contract.Soekeparametere;
-import no.nav.aareg.teknisk.historikk.provider.api.contract.TjenestefeilResponse;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Arrays;
+import java.util.List;
 
 public final class ApiTestData {
 
@@ -12,90 +16,22 @@ public final class ApiTestData {
 
     public static Soekeparametere gyldigSoekeparameter() {
         Soekeparametere soekeparametere = new Soekeparametere();
-        soekeparametere.setArbeidstaker("123456789");
+        soekeparametere.setArbeidstaker("12345678912");
         return soekeparametere;
     }
 
-    public static TjenestefeilResponse tjenestefeilMedMelding(String... melding) {
-        TjenestefeilResponse response = new TjenestefeilResponse();
-        response.setKorrelasjonsid("korrelasjonsid");
-        response.setMeldinger(Arrays.asList(melding));
-        return response;
-    }
-
-    public static final String ARBEIDSFORHOLD_1 = """
-            [
-              {
-                "id": "abc-321",
-                "navUuid": "54c260b3-344a-48da-b2ab-e472978cd2b4",
-                "type": {
-                  "kode": "TEST",
-                  "beskrivelse": "testbeskrivelse"
-                },
-                "arbeidstaker": {
-                  "type": "Person",
-                  "identer": [
-                    {
-                      "type": "FOLKEREGISTERIDENT",
-                      "ident": "123456789123",
-                      "gjeldende": true
-                    }
-                  ]
-                },
-                "opplysningspliktig": {
-                  "type": "Hovedenhet",
-                  "identer": [
-                    {
-                      "type": "ORGANISASJONSNUMMER",
-                      "ident": "123456789"
-                    }
-                  ]
-                },
-                "arbeidssted": {
-                  "type": "Underenhet",
-                  "identer": [
-                    {
-                      "type": "ORGANISASJONSNUMMER",
-                      "ident": "213456789"
-                    }
-                  ]
-                },
-                "rapporteringsordning": {
-                  "kode": "TEST",
-                  "beskrivelse": "testbeskrivelse"
-                },
-                "bruksperiode": {
-                  "fom": "2018-09-19T12:10:58.059Z",
-                  "tom": "2018-09-19T12:10:58.059Z"
-                },
-                "ansettelsesperioder": [
-                  {
-                    "startdato": "2014-07-01",
-                    "sluttdato": "2015-12-31",
-                    "sluttaarsak": {
-                      "kode": "TEST",
-                      "beskrivelse": "testbeskrivelse"
-                    },
-                    "bruksperiode": {
-                      "fom": "2018-09-19T12:10:58.059Z",
-                      "tom": "2018-09-19T12:10:58.059Z"
-                    },
-                    "sporingsinformasjon": {
-                      "opprettetTidspunkt": "2018-09-19T12:10:58.059Z",
-                      "opprettetKilde": "EDAG",
-                      "endretTidspunkt": "2018-09-19T12:11:20.79Z",
-                      "endretKilde": "AVSLUTNING"
-                    }
-                  }
-                ],
-                "sporingsinformasjon": {
-                  "opprettetTidspunkt": "2018-09-19T12:10:58.059Z",
-                  "opprettetKilde": "EDAG",
-                  "endretTidspunkt": "2018-09-19T12:11:20.79Z",
-                  "endretKilde": "AVSLUTNING"
-                }
-              }
-            ]
-            """;
+    public static final TekniskHistorikkResponse TEKNISK_HISTORIKK_RESPONSE_1 = new TekniskHistorikkResponse(
+            List.of(new TekniskHistorikk(
+                    123L,
+                    "123456789",
+                    "213456789",
+                    "12345678912",
+                    "ordinaertArbeidsforhold",
+                    LocalDate.of(2014, 7 ,1),
+                    LocalDate.of(2015,12,31),
+                    "Endring",
+                    LocalDateTime.of(2018,9,19, 12, 11, 20, 79)
+            ))
+    );
 }
 

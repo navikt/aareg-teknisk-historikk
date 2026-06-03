@@ -7,9 +7,12 @@ metadata:
     team: arbeidsforhold
 spec:
   image: {{image}}
+
   port: 8080
+
   ingresses:
     - https://aareg-teknisk-historikk.ekstern.dev.nav.no
+
   env:
     - name: APP_NAME
       value: aareg-teknisk-historikk
@@ -17,34 +20,45 @@ spec:
       value: https://aareg-services.dev-fss-pub.nais.io
     - name: APP_TEXAS_TARGET_AAREG_SERVICES
       value: api://dev-fss.arbeidsforhold.aareg-services-nais/.default
+    - name: APP_URL_AAREG_TILGANGSKONTROLL
+      value: https://aareg-tilgangskontroll-q2.intern.dev.nav.no
+    - name: APP_TEXAS_TARGET_AAREG_TILGANGSKONTROLL
+      value: api://dev-gcp.arbeidsforhold.aareg-tilgangskontroll-q2/.default
+
   replicas:
-    min: 2
-    max: 2
+    min: 1
+    max: 1
     cpuThresholdPercentage: 50
+
   liveness:
     path: /actuator/health/liveness
     initialDelay: 60
     periodSeconds: 2
     timeout: 2
     failureThreshold: 30
+
   readiness:
     path: /actuator/health/readiness
     initialDelay: 60
     periodSeconds: 2
     timeout: 2
     failureThreshold: 30
+
   resources:
     requests:
       cpu: 100m
       memory: 500Mi
     limits:
       memory: 10Gi
+
   prometheus:
     enabled: true
     path: actuator/prometheus
+
   azure:
     application:
       enabled: true
+
   maskinporten:
     enabled: true
     scopes:
@@ -62,8 +76,14 @@ spec:
               orgno: "810514442"
             - name: Fellesordningen for AFP
               orgno: "987414502"
+
   accessPolicy:
     outbound:
+      rules:
+        - application: aareg-tilgangskontroll-q2
+          namespace: arbeidsforhold
+          cluster: dev-gcp
+        - application: logging
+          namespace: nais-system
       external:
         - host: aareg-services.dev-fss-pub.nais.io
-
