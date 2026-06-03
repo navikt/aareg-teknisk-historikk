@@ -21,7 +21,9 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.source>25</maven.compiler.source>
         <maven.compiler.target>25</maven.compiler.target>
-        <logstash-logback-encoder.version>7.3</logstash-logback-encoder.version>
+        <!-- Logging -->
+        <logstash-logback-encoder.version>9.0</logstash-logback-encoder.version>
+        <logback-syslog4j.version>1.0.0</logback-syslog4j.version>
 
         <!-- Test dependencies -->
         <wiremock.version>3.13.2</wiremock.version>
@@ -63,6 +65,11 @@
             <groupId>net.logstash.logback</groupId>
             <artifactId>logstash-logback-encoder</artifactId>
             <version>${logstash-logback-encoder.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.papertrailapp</groupId>
+            <artifactId>logback-syslog4j</artifactId>
+            <version>${logback-syslog4j.version}</version>
         </dependency>
         <dependency>
             <groupId>org.projectlombok</groupId>
