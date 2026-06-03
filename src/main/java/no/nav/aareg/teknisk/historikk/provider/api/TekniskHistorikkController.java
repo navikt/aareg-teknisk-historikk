@@ -3,6 +3,7 @@ package no.nav.aareg.teknisk.historikk.provider.api;
 import io.micrometer.core.instrument.MeterRegistry;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import no.nav.aareg.teknisk.historikk.exception.IngenTilgangException;
 import no.nav.aareg.teknisk.historikk.provider.api.contract.Soekeparametere;
 import no.nav.aareg.teknisk.historikk.provider.api.contract.TekniskHistorikkMapper;
@@ -17,6 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import static no.nav.aareg.teknisk.historikk.KonsumentLogging.loggOppslag;
 
+@Slf4j
 @RestController
 @RequestMapping("/api/v1/arbeidsforhold")
 @RequiredArgsConstructor
@@ -38,6 +40,7 @@ public class TekniskHistorikkController {
             var feiltekst = e.getFeilkode().getFeiltekst();
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(mapper.map(feiltekst));
         } catch (Exception e) {
+            log.error("Feil ved henting av teknisk historikk for arbeidstaker", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(mapper.map("Uventet feil - kontakt brukerstøtte"));
         } finally {
             loggOppslag(meterRegistry, httpServletRequest, FINN_TEKNISK_HISTORIKK_NAVN);
