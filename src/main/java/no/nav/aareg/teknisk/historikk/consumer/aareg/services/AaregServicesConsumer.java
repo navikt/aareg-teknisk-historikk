@@ -30,7 +30,6 @@ public class AaregServicesConsumer {
                     httpHeaders.setBearerAuth(texasConsumer.hentEntraToken(target));
                     httpHeaders.setContentType(MediaType.APPLICATION_JSON);
                 })
-                .body(soekeparametere)
                 .retrieve()
                 .body(TekniskHistorikkResponse.class);
     }
