@@ -23,7 +23,7 @@ spec:
       value: api://dev-fss.arbeidsforhold.aareg-services-nais/.default
 
     - name: APP_URL_AAREG_TILGANGSKONTROLL
-      value: https://aareg-tilgangskontroll-q2
+      value: http://aareg-tilgangskontroll-q2
     - name: APP_TEXAS_TARGET_AAREG_TILGANGSKONTROLL
       value: api://dev-gcp.arbeidsforhold.aareg-tilgangskontroll-q2/.default
 
