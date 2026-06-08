@@ -7,6 +7,7 @@ import lombok.Getter;
 import lombok.Setter;
 import no.nav.aareg.teknisk.historikk.wiremock.WireMockStub;
 import org.springframework.http.HttpHeaders;
+import tools.jackson.databind.json.JsonMapper;
 
 import java.util.List;
 
@@ -29,7 +30,7 @@ public class AaregTilgangskontrollStub implements WireMockStub {
     private List<StubMapping> stubMappings;
 
     public AaregTilgangskontrollStub() {
-        this.responseTransformer = new AaregTilgangskontrollResponseTransformer(this);
+        this.responseTransformer = new AaregTilgangskontrollResponseTransformer(this, new JsonMapper());
     }
 
     @Override

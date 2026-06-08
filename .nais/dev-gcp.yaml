@@ -16,14 +16,26 @@ spec:
   env:
     - name: APP_NAME
       value: aareg-teknisk-historikk
+
     - name: APP_URL_AAREG_SERVICES
       value: https://aareg-services.dev-fss-pub.nais.io
     - name: APP_TEXAS_TARGET_AAREG_SERVICES
       value: api://dev-fss.arbeidsforhold.aareg-services-nais/.default
+
     - name: APP_URL_AAREG_TILGANGSKONTROLL
-      value: https://aareg-tilgangskontroll-q2.intern.dev.nav.no
+      value: http://aareg-tilgangskontroll-q2
     - name: APP_TEXAS_TARGET_AAREG_TILGANGSKONTROLL
       value: api://dev-gcp.arbeidsforhold.aareg-tilgangskontroll-q2/.default
+
+    - name: APP_SECURITY_OIDC_IDP_MASKINPORTEN_ISSUERURL
+      value: https://test.maskinporten.no/
+    - name: APP_SECURITY_OIDC_IDP_MASKINPORTEN_JWKSETURI
+      value: https://test.maskinporten.no/jwks
+
+  observability:
+    autoInstrumentation:
+      enabled: true
+      runtime: java
 
   replicas:
     min: 1

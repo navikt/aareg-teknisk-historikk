@@ -1,6 +1,5 @@
 package no.nav.aareg.teknisk.historikk.wiremock.aareg.tilgangskontroll;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.tomakehurst.wiremock.client.ResponseDefinitionBuilder;
 import com.github.tomakehurst.wiremock.extension.ResponseDefinitionTransformerV2;
 import com.github.tomakehurst.wiremock.http.ResponseDefinition;
@@ -12,6 +11,7 @@ import no.nav.aareg.teknisk.historikk.consumer.aareg.tilgangskontroll.dto.Tilgan
 import no.nav.aareg.teknisk.historikk.consumer.aareg.tilgangskontroll.dto.TilgangsforespoerselResponse;
 import org.springframework.http.HttpHeaders;
 import org.springframework.util.StringUtils;
+import tools.jackson.databind.json.JsonMapper;
 
 import java.util.ArrayList;
 
@@ -19,6 +19,7 @@ import java.util.ArrayList;
 public class AaregTilgangskontrollResponseTransformer implements ResponseDefinitionTransformerV2 {
 
     private final AaregTilgangskontrollStub aaregTilgangskontrollStub;
+    private final JsonMapper jsonMapper;
 
     @Override
     public String getName() {
@@ -28,7 +29,7 @@ public class AaregTilgangskontrollResponseTransformer implements ResponseDefinit
     @Override
     @SneakyThrows
     public ResponseDefinition transform(ServeEvent serveEvent) {
-        var requestBody = new ObjectMapper().readValue(serveEvent.getRequest().getBody(), TilgangsforespoerselRequest.class);
+        var requestBody = jsonMapper.readValue(serveEvent.getRequest().getBody(), TilgangsforespoerselRequest.class);
         TilgangsforespoerselResponse response;
 
         var adressebeskyttedePersoner = aaregTilgangskontrollStub.getAdressebeskyttedePersoner();
@@ -54,14 +55,14 @@ public class AaregTilgangskontrollResponseTransformer implements ResponseDefinit
                             arbeidstaker,
                             harTilgang ? null : "Adressebeskyttet",
                             harTilgang,
-                            StringUtils.hasText(opplysningspliktig) ? adressebeskyttedePersoner.contains(opplysningspliktig) : false,
+                            StringUtils.hasText(opplysningspliktig) && adressebeskyttedePersoner.contains(opplysningspliktig),
                             adressebeskyttedePersoner.contains(arbeidstaker)
                     )
             );
         });
 
         response = new TilgangsforespoerselResponse(tilgangsliste);
-        var responseBody = new ObjectMapper().writeValueAsString(response);
+        var responseBody = jsonMapper.writeValueAsString(response);
 
         return ResponseDefinitionBuilder
                 .like(serveEvent.getResponseDefinition())
