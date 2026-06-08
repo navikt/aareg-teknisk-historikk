@@ -15,19 +15,17 @@ public class TekniskHistorikkMapper {
 
     public TekniskHistorikkResponse map(no.nav.aareg.kontrakter.teknisk.historikk.TekniskHistorikkResponse domeneRespons) {
         var apiArbeidsforhold = new ArrayList<Arbeidsforhold>();
-        domeneRespons.tekniskHistorikk().forEach(th -> {
-            apiArbeidsforhold.add(new Arbeidsforhold(
-                    th.arbeidsforholdId(),
-                    th.arbeidsforholdType(),
-                    mapArbeidssted(th.arbeidsstedId()),
-                    mapOpplysningspliktig(th.opplysningspliktigId()),
-                    mapArbeidstaker(th.arbeidstakerId()),
-                    th.ansattFra(),
-                    th.ansattTil(),
-                    th.type(),
-                    th.datoEndret()
-            ));
-        });
+        domeneRespons.tekniskHistorikk().forEach(th -> apiArbeidsforhold.add(new Arbeidsforhold(
+                th.arbeidsforholdId(),
+                th.arbeidsforholdType(),
+                mapArbeidssted(th.arbeidsstedId()),
+                mapOpplysningspliktig(th.opplysningspliktigId()),
+                mapArbeidstaker(th.arbeidstakerId()),
+                th.ansattFra(),
+                th.ansattTil(),
+                th.type(),
+                th.datoEndret()
+        )));
         return new TekniskHistorikkResponse(apiArbeidsforhold, List.of(), tracer.currentSpan().context().traceId());
     }
 

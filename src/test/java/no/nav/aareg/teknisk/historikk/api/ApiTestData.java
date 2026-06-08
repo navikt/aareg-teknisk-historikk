@@ -6,7 +6,6 @@ import no.nav.aareg.teknisk.historikk.provider.api.contract.Soekeparametere;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.Arrays;
 import java.util.List;
 
 public final class ApiTestData {
@@ -27,10 +26,10 @@ public final class ApiTestData {
                     "213456789",
                     "12345678912",
                     "ordinaertArbeidsforhold",
-                    LocalDate.of(2014, 7 ,1),
-                    LocalDate.of(2015,12,31),
+                    LocalDate.of(2014, 7, 1),
+                    LocalDate.of(2015, 12, 31),
                     "Endring",
-                    LocalDateTime.of(2018,9,19, 12, 11, 20, 79)
+                    LocalDateTime.of(2018, 9, 19, 12, 11, 20, 79)
             ))
     );
 }

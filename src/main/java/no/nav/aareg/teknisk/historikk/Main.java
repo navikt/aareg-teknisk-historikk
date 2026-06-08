@@ -11,7 +11,7 @@ import static org.springframework.boot.Banner.Mode.OFF;
 @ConfigurationPropertiesScan
 public class Main extends SpringBootServletInitializer {
 
-    public static void main(String[] args) {
+    static void main(String[] args) {
         new SpringApplicationBuilder()
                 .bannerMode(OFF)
                 .sources(Main.class)

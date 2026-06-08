@@ -55,7 +55,7 @@ public class AaregTilgangskontrollResponseTransformer implements ResponseDefinit
                             arbeidstaker,
                             harTilgang ? null : "Adressebeskyttet",
                             harTilgang,
-                            StringUtils.hasText(opplysningspliktig) ? adressebeskyttedePersoner.contains(opplysningspliktig) : false,
+                            StringUtils.hasText(opplysningspliktig) && adressebeskyttedePersoner.contains(opplysningspliktig),
                             adressebeskyttedePersoner.contains(arbeidstaker)
                     )
             );
