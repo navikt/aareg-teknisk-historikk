@@ -1,6 +1,6 @@
 package no.nav.aareg.teknisk.historikk.audit;
 
-import io.micrometer.tracing.Tracer;
+import io.opentelemetry.api.trace.Span;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import no.nav.aareg.kontrakter.teknisk.historikk.TekniskHistorikk;
@@ -21,7 +21,6 @@ public class AuditLogger {
 
     private static final Logger AUDIT_LOGGER = LoggerFactory.getLogger("auditLogger");
 
-    private final Tracer tracer;
     private final MaskinportenClaimsService maskinportenClaimsService;
 
     @Value("${app.name}")
@@ -77,6 +76,17 @@ public class AuditLogger {
         var konsumentId = maskinportenClaimsService.hentOrgnrFraToken().konsument();
         var databehandlerId = maskinportenClaimsService.hentOrgnrFraToken().databehandler();
 
-        return new Auditelement(TekniskHistorikk.class.getSimpleName(), arbeidstakerId, konsumentId, databehandlerId, appName, tracer.currentSpan().context().traceId());
+        return new Auditelement(
+                TekniskHistorikk.class.getSimpleName(),
+                arbeidstakerId,
+                konsumentId,
+                databehandlerId,
+                appName,
+                currentTraceId()
+        );
+    }
+
+    private String currentTraceId() {
+        return Span.current().getSpanContext().getTraceId();
     }
 }

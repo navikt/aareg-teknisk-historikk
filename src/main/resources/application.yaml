@@ -1,8 +1,4 @@
 management:
-  otlp:
-    metrics:
-      export:
-        url: http://opentelemetry-collector.nais-system:4318/v1/metrics
   metrics:
     distribution:
       percentiles-histogram:
