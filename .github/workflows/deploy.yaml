@@ -47,7 +47,7 @@ jobs:
             JAR_PATH=target/app.jar
 
   deploy-prod:
-    name: Deploy to NAIS Prod-fss
+    name: Deploy to NAIS Prod-gcp
     needs: build_and_push
     permissions:
       contents: read
