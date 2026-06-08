@@ -31,8 +31,6 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 public class MaskinportenStub implements WireMockStub {
 
-    public static final String MASKINPORTEN_SKATTEETATEN_TOKEN_VALUE = "Bearer token";
-
     private static final String MASKINPORTEN_CONSUMER = "815493000";
     private static final String MASKINPORTEN_SUPPLIER = "815493001";
 
@@ -105,22 +103,6 @@ public class MaskinportenStub implements WireMockStub {
                 "  \"access_token\": \"token\"," +
                 "  \"expires_in\": \"" + LocalTime.now().plusMinutes(2).toEpochSecond(localDateNow, ZoneOffset.MIN) + "\"" +
                 "}";
-    }
-
-    public String generateToken(String scope) {
-        return generateToken(createDefaultClaims(scope));
-    }
-
-    public String generateTokenWithout(String scope, String... claimsToExclude) {
-        Map<String, Object> claims = createDefaultClaims(scope);
-        Arrays.asList(claimsToExclude).forEach(claims::remove);
-        return generateToken(claims);
-    }
-
-    public String generateTokenWithOverride(String scope, String claim, Object overrideValue) {
-        Map<String, Object> claims = createDefaultClaims(scope);
-        claims.put(claim, overrideValue);
-        return generateToken(claims);
     }
 
     public String generateTokenWithOverrides(String scope, Map<String, Object> overrides, String... claimsToExclude) {
